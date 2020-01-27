@@ -2,6 +2,7 @@
 
 """
 Convert multiple tables into single .csv file.
+Create train and test datasets.
 """
 __version__ = "1.0pre"
 
@@ -16,16 +17,37 @@ import subprocess
 import logging
 import json
 import pandas as pd
+import pprint as pp
 
 from logwith import *
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
-def main(args):
+def main(arguments):
     '''Program algorithm entry point'''
 
-    
+    #Load configuration .json file
+    for config in arguments.config:
+        configuration = None
+        if ".json" in config:
+            with open(config) as json_data:
+                    configuration = json.load(json_data)
+                    logging.debug(pp.pformat(configuration))
+        elif "_cff.py" in config:
+                module_name = 'module_'+config.strip('.py')
+                configuration_module = imp.load_source(module_name, config)
+                configuration = configuration_module.config
+        logging.debug(pp.pformat(configuration))
+
+    df_Soc_Dem  = pd.read_csv(configuration['Soc_Dem_file'],index_col='Client')
+    df_In_Out   = pd.read_csv(configuration['Inflow_Outflow_file'],index_col='Client')
+    df_Products = pd.read_csv(configuration['Products_ActBalance_file'],index_col='Client')
+    df_Sales    = pd.read_csv(configuration['Sales_Revenues_file'],index_col='Client')
+    df_final    = df_Soc_Dem.join([df_In_Out,df_Products,df_Sales])
+    print df_final.sort_values(by='Client').head()
+    df_final.to_csv(configuration['output_file'])
+
 
 if __name__ == '__main__':
         start_time = time.time()
