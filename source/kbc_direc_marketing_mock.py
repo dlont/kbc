@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-A simple python script template.
+KBC test modelling task.
 """
 __version__ = "1.0pre"
 
@@ -47,7 +47,7 @@ class Style(object):
         @log_with()
         def decorate(self,obj):
                 """
-                Decorate obeject of the model.
+                Decorate object of the model.
                 Assumes Drawable object from ROOT
                 """
                 name = obj.GetName()

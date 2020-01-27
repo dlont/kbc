@@ -1,0 +1,6 @@
+.sconsign.dblite
+SConstruct
+build/
+scons-3.1.2-install/
+source/uml/
+
