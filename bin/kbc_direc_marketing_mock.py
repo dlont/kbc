@@ -1,1 +1,0 @@
-../source/kbc_direc_marketing_mock.py
