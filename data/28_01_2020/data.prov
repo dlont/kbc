@@ -1,0 +1,13 @@
+  <prov:document>
+    <prov:entity prov:id="exc:inputdataset" path="/home/iihe/Desktop/JOB_search/non_academy/KBC_data_science/KBC_test_task/data/28_01_2020/data.csv" md5sum="632c11aa48c899c6ef6c57d7c173de44"/>
+    <prov:activity prov:id="exc:nangenderremoval"/>
+    <prov:used>
+      <prov:activity prov:ref="exc:nangenderremoval" type="manually in editor"/>
+      <prov:entity prov:ref="exc:originaldataset" path="/home/iihe/Desktop/JOB_search/non_academy/KBC_data_science/KBC_test_task/data/27_01_2020/data.csv" md5="8205cb9eb831cf94a178b45cbea0ff64"/>
+    </prov:used>
+    <prov:wasGeneratedBy>
+      <prov:entity prov:ref="exc:inputdataset"/>
+      <prov:activity prov:ref="exc:nangenderremoval"/>
+      <prov:time>2020-01-01T02:30:00</prov:time>
+    </prov:wasGeneratedBy>
+  </prov:document>
