@@ -1,0 +1,18 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: KBC main",
+            "type": "python",
+            "pythonPath": "/usr/bin/python",
+            "envFile": "${workspaceFolder}/.vscode/python.env",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/kbc_direct_marketing_mock.py",
+            "args" : ["-b", "-c", "configs/conf_cff.py", "--dir=results"],
+            "console": "integratedTerminal"
+        }
+    ]
+}
