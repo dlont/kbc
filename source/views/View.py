@@ -84,6 +84,53 @@ class View2dCorrelationsTrain(View):
                 pass
 
         @log_with()
+        def style_features_correlation_pad(self, ax, feature_tup):
+                '''
+                Apply style such as logarithmic scales, legend, title, etc.
+                '''
+                # Plot style
+                if 'legend' in self.model._configuration[feature_tup[0]]['style']: 
+                        ax.legend(prop=self.model._configuration[feature_tup[0]]['style']['legend']['prop'])
+                # if 'logx' in self.model._configuration[feature_tup[0]]['style']: 
+                #         if self.model._configuration[feature_tup[0]]['style']['logx']: ax.set_xscale("log")
+                # if 'logy' in self.model._configuration[feature_tup[1]]['style']: 
+                #         if self.model._configuration[feature_tup[1]]['style']['logy']: ax.set_yscale("log")
+                ax.set_title('{0}:{1}'.format(*feature_tup))
+
+        @log_with()
+        def build_train_correlation_pad(self, ax, feature_tup):
+                '''
+                Plot training scatter plot for two features
+                ax: matplotlib axes instance
+                feature_tup: two elements tuple with features names
+                '''
+                logging.debug('Plotting features: {0}'.format(feature_tup))
+
+                from dataprovider import PandasSurvivedClassSelector, PandasDrownedClassSelector
+                data_provider_f0 = self.model.get_data_provider(self.model._configuration[feature_tup[0]]['data_provider'])
+                class1_selector_f0 = self.model._configuration[feature_tup[0]]['class1']
+                # class2_selector_f0  = self.model._configuration[feature_tup[0]]['class2']
+
+                data_provider_f1 = self.model.get_data_provider(self.model._configuration[feature_tup[1]]['data_provider'])
+                class1_selector_f1 = self.model._configuration[feature_tup[1]]['class1']
+                # class2_selector_f1  = self.model._configuration[feature_tup[1]]['class2']
+
+                class1_training_f0 = list(data_provider_f0.get_training_examples(feature_tup[0],class1_selector_f0))
+                class1_training_f1 = list(data_provider_f1.get_training_examples(feature_tup[1],class1_selector_f1))
+                ax.scatter(class1_training_f0, class1_training_f1,
+                                color=self.model._configuration[feature_tup[0]]['class1_color_train'],
+                                label=self.model._configuration[feature_tup[0]]['class1_label_train'], alpha = 0.5)
+
+                # class2_training_f0 = list(data_provider_f0.get_training_examples(feature_tup[0],class2_selector_f0))
+                # class2_training_f1 = list(data_provider_f1.get_training_examples(feature_tup[1],class2_selector_f1))
+                # ax.scatter(class2_training_f0, class2_training_f1,
+                #                 color=self.model._configuration[feature_tup[0]]['class2_color_train'],
+                #                 label=self.model._configuration[feature_tup[0]]['class2_label_train'], alpha = 0.5)
+
+                # Plot style
+                self.style_features_correlation_pad(ax,feature_tup)
+
+        @log_with()
         def draw(self):
                 if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
                 nrows=self.model._configuration[self.view_name]['layout']['nrows']
@@ -94,7 +141,7 @@ class View2dCorrelationsTrain(View):
 
                 for pad,features in enumerate(self.model._configuration[self.view_name]['features']):
                         if True:
-                                self.model.build_train_correlation_pad(pads[pad],tuple(features))
+                                self.build_train_correlation_pad(pads[pad],tuple(features))
                         else: 
                                 logging.error('Unknown feature type: {}'.format(self.model._configuration[feature]['style']['type']))
                                 raise NotImplementedError
@@ -206,10 +253,10 @@ class View1dTrainTest(View):
                 class1_selector = self.model._configuration[feature_name]['class1']
                 # class2_selector  = self.model._configuration[feature_name]['class2']
         
-                class1_training = list(data_provider.get_training_examples(feature_name,class1_selector).fillna('Unkw'))
-                class1_testing = list(data_provider.get_testing_examples(feature_name,class1_selector).fillna('Unkw'))
-                # class2_training = list(data_provider.get_training_examples(feature_name,class2_selector).fillna('Unkw'))
-                # class2_testing = list(data_provider.get_testing_examples(feature_name,class2_selector).fillna('Unkw'))
+                class1_training = list(data_provider.get_training_examples(feature_name,class1_selector).fillna('-1'))
+                class1_testing = list(data_provider.get_testing_examples(feature_name,class1_selector).fillna('-1'))
+                # class2_training = list(data_provider.get_training_examples(feature_name,class2_selector).fillna('-1'))
+                # class2_testing = list(data_provider.get_testing_examples(feature_name,class2_selector).fillna('-1'))
                 
                 # Binning configuration
                 bins = self.model._configuration[feature_name]['style']['bins']
