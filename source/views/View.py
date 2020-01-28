@@ -110,6 +110,164 @@ class View1dTrainTest(View):
                 pass
 
         @log_with()
+        def style_feature_pad(self, ax, feature_name):
+                '''
+                Apply style such as logarithmic scales, legend, title, etc.
+                '''
+                # Plot style
+                if 'legend' in self.model._configuration[feature_name]['style']: 
+                        ax.legend(prop=self.model._configuration[feature_name]['style']['legend']['prop'])
+                if 'logx' in self.model._configuration[feature_name]['style']: 
+                        if self.model._configuration[feature_name]['style']['logx']: ax.set_xscale("log")
+                if 'logy' in self.model._configuration[feature_name]['style']: 
+                        if self.model._configuration[feature_name]['style']['logy']: ax.set_yscale("log")
+                ax.set_title(self.model._configuration[feature_name]['title'])
+
+        @log_with()      
+        def build_test_train_numerical_feature_pad(self, ax, feature_name):
+                '''
+                Plot training and testing distributions of a feature
+                ax: matplotlib axes instance
+                feature_name: name of the feature distribution to plot
+                '''
+                logging.debug('Plotting feature: {0}'.format(feature_name))
+
+                from dataprovider import PandasSurvivedClassSelector, PandasDrownedClassSelector
+                data_provider = self.model.get_data_provider(self.model._configuration[feature_name]['data_provider'])
+                class1_selector = self.model._configuration[feature_name]['class1']
+                # class2_selector  = self.model._configuration[feature_name]['class2']
+        
+                class1_training = list(data_provider.get_training_examples(feature_name,class1_selector).fillna(-1))
+                class1_testing = list(data_provider.get_testing_examples(feature_name,class1_selector).fillna(-1))
+                # class2_training = list(data_provider.get_training_examples(feature_name,class2_selector).fillna(-1))
+                # class2_testing = list(data_provider.get_testing_examples(feature_name,class2_selector).fillna(-1))
+                
+                # Binning configuration
+                underflow, overflow = self.model._configuration[feature_name]['style']['under_over_flow']
+                bins = self.model._configuration[feature_name]['style']['bins']
+                bin_centers = bins[0:-1]+np.diff(bins)/2.
+                logging.debug('bin_centers ({0})={{1}}'.format(feature_name,bin_centers))
+
+                # Class 1 training and testing distributions
+                if any([underflow, overflow]):
+                        ax.hist(np.clip(class1_training, bins[0] if underflow else None, bins[-1] if overflow else None), bins,
+                        density=True, histtype='stepfilled',
+                        color=self.model._configuration[feature_name]['class1_color_train'], 
+                        label=self.model._configuration[feature_name]['class1_label_train'], alpha = 0.5)
+                else:
+                        ax.hist(class1_training, bins, 
+                        density=True, histtype='stepfilled', 
+                        color=self.model._configuration[feature_name]['class1_color_train'], 
+                        label=self.model._configuration[feature_name]['class1_label_train'], alpha = 0.5)
+                hist_testing = np.histogram(class1_testing, bins)
+                if any([underflow, overflow]):
+                        hist_testing = np.histogram(np.clip(class1_testing, bins[0] if underflow else None, bins[-1] if overflow else None), bins)
+                points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0]))
+                points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/float(np.sum(hist_testing[0]))
+                ax.errorbar(bin_centers, points_testing_y, yerr=points_testing_yerr, marker=self.model._configuration[feature_name]['class1_marker_test'], 
+                                ls=self.model._configuration[feature_name]['class1_line_test'], color=self.model._configuration[feature_name]['class1_color_test'], 
+                                label=self.model._configuration[feature_name]['class1_label_test'])
+
+                # # Class 2 training and testing distributions
+                # if any([underflow, overflow]):
+                #         ax.hist(np.clip(class2_training, bins[0] if underflow else None, bins[-1] if overflow else None), bins,
+                #         density=True, histtype='stepfilled',
+                #         color=self.model._configuration[feature_name]['class2_color_train'], 
+                #         label=self.model._configuration[feature_name]['class2_label_train'], alpha = 0.5)
+                # else:
+                #         ax.hist(class2_training, bins,
+                #         density=True, histtype='stepfilled',
+                #         color=self.model._configuration[feature_name]['class2_color_train'], 
+                #         label=self.model._configuration[feature_name]['class2_label_train'], alpha = 0.5)
+                        
+                # hist_testing = np.histogram(class2_testing, bins)
+                # if any([underflow, overflow]):
+                #         hist_testing = np.histogram(np.clip(class2_testing, bins[0] if underflow else None, bins[-1] if overflow else None), bins)
+                # points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0]))
+                # points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/np.sum(hist_testing[0])
+                # ax.errorbar(bin_centers, points_testing_y, yerr=points_testing_yerr, marker=self.model._configuration[feature_name]['class2_marker_test'], 
+                #                 ls=self.model._configuration[feature_name]['class2_line_test'], color=self.model._configuration[feature_name]['class2_color_test'], 
+                #                 label=self.model._configuration[feature_name]['class2_label_test'])
+                
+                # Plot style
+                self.style_feature_pad(ax,feature_name)
+
+        @log_with()      
+        def build_test_train_categorical_feature_pad(self, ax, feature_name):
+                '''
+                Plot training and testing distributions of a feature
+                ax: matplotlib axes instance
+                feature_name: name of the feature distribution to plot
+                '''
+                logging.debug('Plotting feature: {0}'.format(feature_name))
+
+                from dataprovider import PandasSurvivedClassSelector, PandasDrownedClassSelector
+                data_provider = self.model.get_data_provider(self.model._configuration[feature_name]['data_provider'])
+                class1_selector = self.model._configuration[feature_name]['class1']
+                # class2_selector  = self.model._configuration[feature_name]['class2']
+        
+                class1_training = list(data_provider.get_training_examples(feature_name,class1_selector).fillna('Unkw'))
+                class1_testing = list(data_provider.get_testing_examples(feature_name,class1_selector).fillna('Unkw'))
+                # class2_training = list(data_provider.get_training_examples(feature_name,class2_selector).fillna('Unkw'))
+                # class2_testing = list(data_provider.get_testing_examples(feature_name,class2_selector).fillna('Unkw'))
+                
+                # Binning configuration
+                bins = self.model._configuration[feature_name]['style']['bins']
+
+                class1_training_dic = {bin:0 for bin in bins}
+                for entry in class1_training: class1_training_dic[entry]+=1
+                for bin in bins: class1_training_dic[bin]/=float(len(class1_training))
+                # sort entries in the dictionary in a way defined by the config file
+                class1_training_values = [class1_training_dic[bin] for bin in bins]
+                
+                # class2_training_dic = {bin:0 for bin in bins}
+                # for entry in class2_training: class2_training_dic[entry]+=1
+                # for bin in bins: class2_training_dic[bin]/=float(len(class2_training))
+                # # sort entries in the dictionary in a way defined by the config file
+                # class2_training_values = [class2_training_dic[bin] for bin in bins]
+
+                # Class 1 training and testing distributions
+                ax.bar(bins, class1_training_values, color=self.model._configuration[feature_name]['class1_color_train'], 
+                        label=self.model._configuration[feature_name]['class1_label_train'], alpha = 0.5)
+                class1_testing_dic = {bin:0 for bin in bins}
+                class1_testing_err_dic = {bin:0 for bin in bins}
+                for entry in class1_testing: class1_testing_dic[entry]+=1
+                for bin in bins: class1_testing_err_dic[bin]=np.sqrt(class1_testing_dic[bin])
+                for bin in bins: 
+                        class1_testing_dic[bin]/=float(len(class1_testing))
+                        class1_testing_err_dic[bin]/=float(len(class1_testing))
+                # sort entries in the dictionary in a way defined by the config file
+                class1_testing_values = [class1_testing_dic[bin] for bin in bins]
+                class1_testing_values_err = [class1_testing_err_dic[bin] for bin in bins]
+                ax.errorbar(bins, class1_testing_values, yerr=class1_testing_values_err,
+                                marker=self.model._configuration[feature_name]['class1_marker_test'], 
+                                ls=self.model._configuration[feature_name]['class1_line_test'],
+                                color=self.model._configuration[feature_name]['class1_color_test'], 
+                                label=self.model._configuration[feature_name]['class1_label_test'])
+
+                # # Class 2 training and testing distributions
+                # ax.bar(bins, class2_training_values, color=self.model._configuration[feature_name]['class2_color_train'], 
+                # label=self.model._configuration[feature_name]['class2_label_train'], alpha = 0.5)
+                # class2_testing_dic = {bin:0 for bin in bins}
+                # class2_testing_err_dic = {bin:0 for bin in bins}
+                # for entry in class2_testing: class2_testing_dic[entry]+=1
+                # for bin in bins: class2_testing_err_dic[bin]=np.sqrt(class2_testing_dic[bin])
+                # for bin in bins: 
+                #         class2_testing_dic[bin]/=float(len(class2_testing))
+                #         class2_testing_err_dic[bin]/=float(len(class2_testing))
+                # # sort entries in the dictionary in a way defined by the config file
+                # class2_testing_values = [class2_testing_dic[bin] for bin in bins]
+                # class2_testing_values_err = [class2_testing_err_dic[bin] for bin in bins]
+                # ax.errorbar(bins, class2_testing_values, yerr=class2_testing_values_err,
+                #                 marker=self.model._configuration[feature_name]['class2_marker_test'], 
+                #                 ls=self.model._configuration[feature_name]['class2_line_test'],
+                #                 color=self.model._configuration[feature_name]['class2_color_test'], 
+                #                 label=self.model._configuration[feature_name]['class2_label_test'])
+                
+                # Plot style
+                self.style_feature_pad(ax,feature_name)
+
+        @log_with()
         def draw(self):
                 if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
                 nrows=self.model._configuration[self.view_name]['layout']['nrows']
@@ -120,9 +278,9 @@ class View1dTrainTest(View):
 
                 for pad,feature in enumerate(self.model._configuration[self.view_name]['features']):
                         if self.model._configuration[feature]['style']['type'] == 'numerical':
-                                self.model.build_test_train_numerical_feature_pad(pads[pad],feature)
+                                self.build_test_train_numerical_feature_pad(pads[pad],feature)
                         elif self.model._configuration[feature]['style']['type'] == 'categorical':
-                                self.model.build_test_train_categorical_feature_pad(pads[pad],feature)
+                                self.build_test_train_categorical_feature_pad(pads[pad],feature)
                         else: 
                                 logging.error('Unknown feature type: {}'.format(self.model._configuration[feature]['style']['type']))
                                 raise NotImplementedError

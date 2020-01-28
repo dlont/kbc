@@ -71,7 +71,7 @@ class Style(object):
                 legend.SetBorderSize(0)
                 if header: legend.SetHeader(header)
                 for el in objlist:
-			pass
+                        pass
                         # legend.AddEntry(self._model.get(el),self._json[el]['legend']['name'],self._json[el]['legend']['style'])
                 c.cd()
                 legend.Draw()
@@ -151,7 +151,7 @@ def main(arguments):
             configuration['command']=' '.join(sys.argv)
             document.save_config(config)
 
-            model.build_best_prediction()
+        #     model.build_best_prediction()
 
         return 0
 
