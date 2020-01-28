@@ -4,7 +4,7 @@
 Convert multiple tables into single .csv file.
 Create a single file with entire datasets. Train and test samples can be obtained in a few lines of code in the modelling script.
 """
-__version__ = "1.0"
+__version__ = "1.1"
 
 import os
 import sys
@@ -49,6 +49,10 @@ def main(arguments):
 
     # Join different tables
     df_final    = df_Soc_Dem.join([df_In_Out,df_Products,df_Sales])
+
+    # Binary encoding of textual genedel labels
+    df_final['Sex'] = df_final['Sex'].replace({'M':0,'F':1})
+    df_final = df_final.astype({'Sex':'int32'})
 
     print df_final.sort_values(by='Client').head()
 
