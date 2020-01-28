@@ -2,9 +2,9 @@
 
 """
 Convert multiple tables into single .csv file.
-Create a single file with entire datasets. Train and test samples can be obtained in a few lines of code in the modelling script.
+Create train and test datasets.
 """
-__version__ = "1.0"
+__version__ = "1.0pre"
 
 import os
 import sys
@@ -52,8 +52,12 @@ def main(arguments):
 
     print df_final.sort_values(by='Client').head()
 
-    # Output entire dataset to file
-    df_final.to_csv(configuration['output_file']['file'])
+    # Split joined dataset into training and testing parts
+    df_final_train, df_final_test = train_test_split(df_final, train_size=configuration['training_fraction'])
+    
+    # Output training and testing dataframes to files
+    df_final_train.to_csv(configuration['output_train']['file'])
+    df_final_test.to_csv(configuration['output_test']['file'])
 
 
 if __name__ == '__main__':
