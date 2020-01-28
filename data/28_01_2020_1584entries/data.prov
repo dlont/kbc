@@ -1,0 +1,13 @@
+  <prov:document>
+    <prov:entity prov:id="exc:inputdataset" path="/home/iihe/Desktop/JOB_search/non_academy/KBC_data_science/KBC_test_task/data/28_01_2020_1584entries/data.csv" md5sum="7c44efe628c7021c9efbda96a04ad191"/>
+    <prov:activity prov:id="exc:naninoutflowremoval"/>
+    <prov:used>
+      <prov:activity prov:ref="exc:naninoutflowremoval" type="manually in editor"/>
+      <prov:entity prov:ref="exc:originaldataset" path="/home/iihe/Desktop/JOB_search/non_academy/KBC_data_science/KBC_test_task/data/28_01_2020/data.csv" md5sum="632c11aa48c899c6ef6c57d7c173de44"/>
+    </prov:used>
+    <prov:wasGeneratedBy>
+      <prov:entity prov:ref="exc:inputdataset"/>
+      <prov:activity prov:ref="exc:naninoutflowremoval"/>
+      <prov:time>2020-01-28T10:49:00</prov:time>
+    </prov:wasGeneratedBy>
+  </prov:document>
