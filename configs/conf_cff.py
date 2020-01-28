@@ -6,16 +6,17 @@ config={'annotation': 'Modelling data distributions.',
  'model':'advanced',
  'mode': 'report',
 #  'views':['features_1d_Soc_Dem_p1','features_1d_Inflow_Outflow_p1','features_2d_train_test_correlations_p1'],
- 'views':['features_1d_Soc_Dem_p1','features_1d_Inflow_Outflow_p1','features_1d_Inflow_Outflow_p2', 'features_1d_Targets_p1'],
- 'features_1d_Soc_Dem_p1':{
+ 'views':['features_1d_Soc_Dem_p1','features_1d_Inflow_Outflow_p1','features_1d_Inflow_Outflow_p2', 'features_1d_Targets_p1',
+ 'features_2d_Targets_correlations_p1'],
+  'features_1d_Soc_Dem_p1':{
      'annotation': 'Age, Sex, Tenure train/test distributions.',
      'type':'1d_train_test',
      'output_filename':'features_1d_Soc_Dem_p1',
      'layout':{'nrows':1, 'ncols':3},
      'size': [8.5,2.5],
      'features':['Sex','Age','Tenure']
-},
- 'features_1d_Inflow_Outflow_p1':{
+  },
+  'features_1d_Inflow_Outflow_p1':{
      'annotation': 'Inflow/Outflow distribution p1.',
      'type':'1d_train_test',
      'output_filename':'features_1d_Inflow_Outflow_p1',
@@ -23,7 +24,7 @@ config={'annotation': 'Modelling data distributions.',
      'size': [8.5,5.0],
      'features':['VolumeCred','VolumeCred_CA','TransactionsCred','TransactionsCred_CA','VolumeDeb','VolumeDeb_CA','VolumeDebCash_Card']
   },
-   'features_1d_Inflow_Outflow_p2':{
+  'features_1d_Inflow_Outflow_p2':{
      'annotation': 'Inflow/Outflow distribution p2.',
      'type':'1d_train_test',
      'output_filename':'features_1d_Inflow_Outflow_p2',
@@ -31,7 +32,7 @@ config={'annotation': 'Modelling data distributions.',
      'size': [8.5,5.0],
      'features':['VolumeDebCashless_Card','VolumeDeb_PaymentOrder','TransactionsDeb','TransactionsDeb_CA','TransactionsDebCash_Card','TransactionsDebCashless_Card','TransactionsDeb_PaymentOrder']
   },
-   'features_1d_Targets_p1':{
+  'features_1d_Targets_p1':{
      'annotation': 'Sales and revenues p1.',
      'type':'1d_train_test',
      'output_filename':'features_1d_Targets_p1',
@@ -39,13 +40,13 @@ config={'annotation': 'Modelling data distributions.',
      'size': [8.5,5.0],
      'features':['Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL']
   },
-  'features_2d_train_test_correlations_p1':{
-     'annotation': 'Fare VS Age and SibSp VS Parch train/test correlations.',
+  'features_2d_Targets_correlations_p1':{
+     'annotation': 'Revenue targets correlations.',
      'type':'2d_train_correlations',
-     'output_filename':'features_2d_train_test_p1',
-     'layout':{'nrows':1, 'ncols':2},
+     'output_filename':'features_2d_Targets_correlations_p1',
+     'layout':{'nrows':1, 'ncols':3},
      'size': [8.5,5.0],
-     'features':[['Fare','Age'],['SibSp','Parch']]
+     'features':[['Revenue_MF','Revenue_CC'],['Revenue_MF','Revenue_CL'],['Revenue_CC','Revenue_CL']]
   },
   ##########
   'Sex':{
@@ -495,7 +496,7 @@ config={'annotation': 'Modelling data distributions.',
         'class2_label_test':'Drowned (test)',
   },
   #############
-    'Sale_MF':{
+  'Sale_MF':{
         'data_provider':'train_data_provider',
         'title':'target variable for \n sale of mutual fund',
         'style':{
@@ -651,6 +652,6 @@ config={'annotation': 'Modelling data distributions.',
   },
   #############
   'train_data_provider':{
-        'input_file':'data/28_01_2020_1584entries/data.csv'
+        'input_file':'data/28_01_2020/data_Products_ActBalance_default0.csv'
   }
  }

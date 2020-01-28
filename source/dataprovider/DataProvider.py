@@ -84,8 +84,6 @@ class PandasDataProviderFromCSV(PandasDataProviderFromCSV):
             self.training_fraction = 0.5
             self.data = pd.read_csv(self.filename_csv, index_col='Client')
             # transform data using pipelines
-            for col in ['Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL']: 
-                self.data[col] = self.data[col].fillna(-1)
 
             self.train, self.test = train_test_split(self.data, train_size=self.training_fraction)
 
