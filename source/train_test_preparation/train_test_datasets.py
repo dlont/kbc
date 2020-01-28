@@ -4,7 +4,7 @@
 Convert multiple tables into single .csv file.
 Create a single file with entire datasets. Train and test samples can be obtained in a few lines of code in the modelling script.
 """
-__version__ = "1.1"
+__version__ = "1.2"
 
 import os
 import sys
@@ -18,8 +18,6 @@ import logging
 import json
 import pandas as pd
 import pprint as pp
-
-from logwith import *
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -52,7 +50,15 @@ def main(arguments):
 
     # Binary encoding of textual genedel labels
     df_final['Sex'] = df_final['Sex'].replace({'M':0,'F':1})
-    df_final = df_final.astype({'Sex':'int32'})
+    # df_final = df_final.astype({'Sex':'int32'})
+
+    if 'imputation' in configuration:
+        for col in configuration['imputation']:
+            value = configuration['imputation'][col]
+            df_final[col] = df_final[col].fillna(value)
+
+    if 'dropna' in configuration:
+        df_final = df_final.dropna(subset=configuration['dropna'])
 
     print df_final.sort_values(by='Client').head()
 

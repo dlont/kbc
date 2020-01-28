@@ -1,0 +1,12 @@
+  <prov:document>
+    <prov:entity prov:id="exc:inputdataset" path="/home/iihe/Desktop/JOB_search/non_academy/KBC_data_science/KBC_test_task/data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv" md5sum="1d0e3484c079278c9c061dcf4973e584"/>
+    <prov:activity prov:id="exc:train_test_datasets.py"/>
+    <prov:used>
+      <prov:activity prov:ref="exc:train_test_datasets.py" type="python script" config="/home/iihe/Desktop/JOB_search/non_academy/KBC_data_science/KBC_test_task/configs/train_test_csv_Products_ActBalance_default0_cff.py"/>
+    </prov:used>
+    <prov:wasGeneratedBy>
+      <prov:entity prov:ref="exc:inputdataset"/>
+      <prov:activity prov:ref="exc:train_test_datasets.py"/>
+      <prov:time>2020-01-28T22:30:00</prov:time>
+    </prov:wasGeneratedBy>
+  </prov:document>
