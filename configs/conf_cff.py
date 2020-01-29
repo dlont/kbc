@@ -10,7 +10,7 @@ config={'annotation': 'Modelling data distributions.',
   'features_1d_Products_ActBalance_p1', 'features_1d_Products_ActBalance_p2',
   'features_1d_Targets_p1', 'features_2d_Targets_correlations_p1'],
   'features_1d_Soc_Dem_p1':{
-     'annotation': 'Age, Sex, Tenure train/test distributions.',
+     'annotation': 'Age, Sex, Tenure train/test distributions p1.',
      'type':'1d_train_test',
      'output_filename':'features_1d_Soc_Dem_p1',
      'layout':{'nrows':1, 'ncols':3},
