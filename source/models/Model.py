@@ -117,17 +117,19 @@ class AdvancedModel(Model):
                 pass
 
 
-class VanillaModel(Model):
+class VanillaModelRegression(Model):
         def __init__(self,configuration):
                 self._configuration = configuration
                 self._objects = {}
                 self._annotation = 'Performance comparision of different MVA discriminants'
                 if 'annotation' in self._configuration:
                         self._annotation = self._configuration['annotation']
+                self.fit_results = None
                 self.Initialize()
 
         @log_with()
         def Initialize(self):
+                self.build_best_prediction()
                 pass
 
         @log_with()
@@ -160,32 +162,48 @@ class VanillaModel(Model):
         def build_best_prediction(self):
                 print "Dummy building vanilla model!"
 
-                from xgboost import XGBRegressor
+                from matplotlib import pyplot
+                from xgboost import XGBRegressor, plot_importance
                 # from sklearn.metrics import explained_variance_score, max_error, mean_absolute_error, mean_squared_error
                 from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
                 
-                data_provider = self.get_data_provider(self._configuration['Sex']['data_provider'])
+                target_variable_names = self._configuration['model']['target'][0]
+                data_provider = self.get_data_provider(self._configuration[target_variable_names]['data_provider'])
 
-                my_model = XGBRegressor()
-                X_train = data_provider.train.drop(['Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL'],axis=1)
-                # y_train = data_provider.train[['Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL']]
-                y_train = data_provider.train['Revenue_MF']
-                
-                print X_train.dtypes
-                print X_train.head()
+                input_features_names = self._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
 
-                print y_train.dtypes
-                print y_train.head()
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
 
-                my_model.fit(X_train, y_train)
+                # print X_train.dtypes
+                # print X_train.head()
+                # print X_test.dtypes
+                # print X_test.head()
 
-                X_true = data_provider.test.drop(['Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL'],axis=1)
-                y_true = data_provider.test['Revenue_MF']
-                y_pred = my_model.predict(X_true)
-                # print "Max error: ", max_error(y_true,y_pred)
-                print "Explained variance score: ", explained_variance_score(y_true,y_pred)
-                print "Mean absolute error: ", mean_absolute_error(y_true,y_pred)
-                print "Mean squared error: ", mean_squared_error(y_true,y_pred)
+                # print y_train.dtypes
+                # print y_train.head()
+                # print y_test.dtypes
+                # print y_test.head()
+
+                eval_set = [(X_train, y_train), (X_test, y_test)]
+
+                my_model = XGBRegressor(n_estimators=self._configuration['model']['n_estimators'],
+                                        max_depth=self._configuration['model']['max_depth'],
+                                        learning_rate=self._configuration['model']['learning_rate'],
+                                        verbosity=0)
+                my_model.fit(X_train, y_train, eval_metric=["rmse", "mae"], eval_set=eval_set, verbose=False)
+
+                y_pred = my_model.predict(X_test)
+                # print "Max error: ", max_error(y_test,y_pred)
+                print "Explained variance score: ", explained_variance_score(y_test,y_pred)
+                print "Mean absolute error: ", mean_absolute_error(y_test,y_pred)
+                print "Mean squared error: ", mean_squared_error(y_test,y_pred)
+
+                self.fit_results = my_model.evals_result()
+                # print 'YO importance'
+                # plot_importance(my_model)
 
                 pass
 

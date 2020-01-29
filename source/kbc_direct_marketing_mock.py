@@ -3,7 +3,7 @@
 """
 KBC test modelling task.
 """
-__version__ = "1.1pre"
+__version__ = "1.2pre"
 
 import os
 import sys
@@ -107,7 +107,7 @@ def main(arguments):
             logging.debug(pp.pformat(configuration))
 
             model = None
-            if configuration['model']['type'] == 'vanilla': model = VanillaModel(configuration)
+            if configuration['model']['type'] == 'vanilla_regression': model = VanillaModelRegression(configuration)
             elif configuration['model']['type'] == 'advanced': model = AdvancedModel(configuration)
             else: raise NotImplementedError
             
@@ -136,6 +136,8 @@ def main(arguments):
                             view = View1dTrainTest(view_name)
                     elif configuration[view_name]['type'] == '2d_train_correlations':
                             view = View2dCorrelationsTrain(view_name)
+                    elif configuration[view_name]['type'] == 'model_learning_curve':
+                            view = ViewModelLearningCurve(view_name)
                     else: view = View(view_name)
                     view.set_model(model)
                     view.set_style(style)
@@ -145,7 +147,7 @@ def main(arguments):
                     if arguments.annotation_format: view.annotate(arguments.annotation_format)
                     document.add_view(view)
 
-        #     document.draw()
+            document.draw()
 
             document.save(serializer)
             configuration['command']=' '.join(sys.argv)
