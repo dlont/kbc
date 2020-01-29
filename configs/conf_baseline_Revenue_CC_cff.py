@@ -2,7 +2,7 @@ from dataprovider import PandasSurvivedClassSelector, PandasDrownedClassSelector
 from numpy import linspace
 config={
   'annotation': 'Modelling data distributions.',
-  'compatibility_version':'1.2pre',
+  'compatibility_version':'1.3pre',
   'command': 'bin/kbc_direct_marketing_mock.py -c configs/conf_cff.py',
   'latex_main': 'latex/report.tex',
   'model':{
@@ -20,7 +20,7 @@ config={
   'views':['learning_curve'],
   'learning_curve':{
      'annotation': 'Learning curve XGBoost',
-     'type':'model_learning_curve',
+     'type':'regression_model_learning_curve',
      'output_filename':'Revenue_CC_learning_curve',
      'layout':{'nrows':1, 'ncols':2},
      'size': [8.5,2.5],

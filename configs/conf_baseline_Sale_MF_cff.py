@@ -6,9 +6,9 @@ config={
   'command': 'bin/kbc_direct_marketing_mock.py -c configs/conf_cff.py',
   'latex_main': 'latex/report.tex',
   'model':{
-   'type':'vanilla_regression',
+   'type':'vanilla_classification',
    'input_features':['Sex', 'Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'TransactionsCred', 'TransactionsCred_CA', 'VolumeDeb', 'VolumeDeb_CA', 'VolumeDebCash_Card', 'VolumeDebCashless_Card', 'VolumeDeb_PaymentOrder', 'TransactionsDeb', 'TransactionsDeb_CA', 'TransactionsDebCash_Card', 'TransactionsDebCashless_Card', 'TransactionsDeb_PaymentOrder', 'Count_CA', 'Count_SA', 'Count_MF', 'Count_OVD', 'Count_CC', 'Count_CL', 'ActBal_CA', 'ActBal_SA', 'ActBal_MF', 'ActBal_OVD', 'ActBal_CC', 'ActBal_CL'],
-   'target':['Revenue_CL'],
+   'target':['Sale_MF'],
    'n_estimators':200,
    'max_depth':5,
    'learning_rate':0.01,
@@ -20,11 +20,11 @@ config={
   'views':['learning_curve'],
   'learning_curve':{
      'annotation': 'Learning curve XGBoost',
-     'type':'regression_model_learning_curve',
-     'output_filename':'Revenue_CL_learning_curve',
-     'layout':{'nrows':1, 'ncols':2},
+     'type':'classification_model_learning_curve',
+     'output_filename':'Sale_MF_learning_curve',
+     'layout':{'nrows':1, 'ncols':3},
      'size': [8.5,2.5],
-     'metrics':['rmse','mae']
+     'metrics':["error", "auc", "map"]
   },
   'features_1d_Soc_Dem_p1':{
      'annotation': 'Age, Sex, Tenure train/test distributions p1.',
