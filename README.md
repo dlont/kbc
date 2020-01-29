@@ -16,4 +16,23 @@ In order to install Scons
 + argparse
 + textwrap
 
+# Usage
+Old style input data tables join, without imputation
+```bash
+./scons-3.1.2-install/bin/scons train_test_tables
+```
 
+New style with imputation
+```bash
+./scons-3.1.2-install/bin/scons train_test_tables_Products_ActBalance_default
+```
+
+Plotting and modelling
+```bash
+./scons-3.1.2-install/bin/scons runall
+```
+
+Clean plots in results folder
+```bash
+./scons-3.1.2-install/bin/scons trash_plots
+```
