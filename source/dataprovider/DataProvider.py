@@ -79,10 +79,12 @@ class PandasDataProviderFromCSV(PandasDataProviderFromCSV):
             import pandas as pd
             import numpy as np
             from sklearn.model_selection import train_test_split 
-            from sklearn.preprocessing import OneHotEncoder
+            # from sklearn.preprocessing import OneHotEncoder
             self.filename_csv = filename_csv
-            self.training_fraction = 0.5
-            self.data = pd.read_csv(self.filename_csv, index_col='Client')
+            self.training_fraction = 0.7
+            all_data = pd.read_csv(self.filename_csv, index_col='Client')
+            self.data = all_data[all_data.Sale_CC != -1]  #training data
+            # self.data = all_data[all_data.Sale_CC == -1]    #predictions data
             # transform data using pipelines
 
             self.train, self.test = train_test_split(self.data, train_size=self.training_fraction)
