@@ -10,8 +10,8 @@
             "pythonPath": "/usr/bin/python",
             "envFile": "${workspaceFolder}/.vscode/python.env",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/kbc_direct_marketing_mock.py",
-            "args" : ["-b", "-c", "configs/conf_cff.py", "--dir=results"],
+            "program": "${workspaceFolder}/source/kbc_direct_marketing_mock.py",
+            "args" : ["-b", "-c", "configs/conf_baseline_Sale_MF_cff.py", "--dir=results"],
             "console": "integratedTerminal"
         }
     ]
