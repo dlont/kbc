@@ -3,7 +3,7 @@
 """
 KBC test modelling task.
 """
-__version__ = "1.0pre"
+__version__ = "1.1pre"
 
 import os
 import sys
@@ -107,12 +107,10 @@ def main(arguments):
             logging.debug(pp.pformat(configuration))
 
             model = None
-            if configuration['model'] == 'vanilla': model = VanillaModel(configuration)
-            elif configuration['model'] == 'advanced': model = AdvancedModel(configuration)
+            if configuration['model']['type'] == 'vanilla': model = VanillaModel(configuration)
+            elif configuration['model']['type'] == 'advanced': model = AdvancedModel(configuration)
             else: raise NotImplementedError
             
-            model.build_best_prediction()
-
             style = Style(configuration,model)
 
             document = None
