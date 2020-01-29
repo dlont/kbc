@@ -108,6 +108,7 @@ def main(arguments):
 
             model = None
             if configuration['model']['type'] == 'vanilla_regression': model = VanillaModelRegression(configuration)
+            elif configuration['model']['type'] == 'vanilla_classification': model = VanillaModelClassification(configuration)
             elif configuration['model']['type'] == 'advanced': model = AdvancedModel(configuration)
             else: raise NotImplementedError
             
@@ -136,8 +137,10 @@ def main(arguments):
                             view = View1dTrainTest(view_name)
                     elif configuration[view_name]['type'] == '2d_train_correlations':
                             view = View2dCorrelationsTrain(view_name)
-                    elif configuration[view_name]['type'] == 'model_learning_curve':
-                            view = ViewModelLearningCurve(view_name)
+                    elif configuration[view_name]['type'] == 'regression_model_learning_curve':
+                            view = ViewModelRegressionLearningCurve(view_name)
+                    elif configuration[view_name]['type'] == 'classification_model_learning_curve':
+                            view = ViewModelClassificationLearningCurve(view_name)
                     else: view = View(view_name)
                     view.set_model(model)
                     view.set_style(style)
