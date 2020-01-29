@@ -72,23 +72,24 @@ class AdvancedModel(Model):
   
         @log_with()
         def build_best_prediction(self):
-                from xgboost import XGBClassifier
-                from sklearn.metrics import classification_report
-                from dataprovider import PandasSurvivedClassSelector, PandasDrownedClassSelector
+                print "Dummy building advanced model!"
+                # from xgboost import XGBClassifier
+                # from sklearn.metrics import classification_report
+                # from dataprovider import PandasSurvivedClassSelector, PandasDrownedClassSelector
                 
-                data_provider = self.get_data_provider(self._configuration['Age']['data_provider'])
+                # data_provider = self.get_data_provider(self._configuration['Age']['data_provider'])
 
-                my_model = XGBClassifier()
-                X_train, y_train = data_provider.train.drop(['Cabin','Ticket','Name','Survived'],axis=1),data_provider.train['Survived']
-                # print X_train.dtypes
+                # my_model = XGBClassifier()
+                # X_train, y_train = data_provider.train.drop(['Cabin','Ticket','Name','Survived'],axis=1),data_provider.train['Survived']
+                # # print X_train.dtypes
 
-                my_model.fit(X_train, y_train)
+                # my_model.fit(X_train, y_train)
 
-                X_test, y_test = data_provider.test.drop(['Cabin','Ticket','Name','Survived'],axis=1),data_provider.test['Survived']
-                y_pred = my_model.predict(X_test)
-                print classification_report(y_test, y_pred, target_names=['Survived','Drowned'])
+                # X_test, y_test = data_provider.test.drop(['Cabin','Ticket','Name','Survived'],axis=1),data_provider.test['Survived']
+                # y_pred = my_model.predict(X_test)
+                # print classification_report(y_test, y_pred, target_names=['Survived','Drowned'])
 
-                self.predict_kaggle_output(my_model)
+                # self.predict_kaggle_output(my_model)
 
                 pass
 
@@ -157,21 +158,34 @@ class VanillaModel(Model):
 
         @log_with()
         def build_best_prediction(self):
-                # from xgboost import XGBClassifier
-                # from sklearn.metrics import classification_report
-                # from dataprovider import PandasSurvivedClassSelector, PandasDrownedClassSelector
+                print "Dummy building vanilla model!"
+
+                from xgboost import XGBRegressor
+                # from sklearn.metrics import explained_variance_score, max_error, mean_absolute_error, mean_squared_error
+                from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
                 
-                # data_provider = self.get_data_provider(self._configuration['Age']['data_provider'])
+                data_provider = self.get_data_provider(self._configuration['Sex']['data_provider'])
 
-                # my_model = XGBClassifier()
-                # X_train, y_train = data_provider.train.drop(['Cabin','Ticket','Name','Survived'],axis=1),data_provider.train['Survived']
-                # # print X_train.dtypes
-
-                # my_model.fit(X_train, y_train)
-
-                # X_test, y_test = data_provider.test.drop(['Cabin','Ticket','Name','Survived'],axis=1),data_provider.test['Survived']
-                # y_pred = my_model.predict(X_test)
-                # print classification_report(y_test, y_pred, target_names=['Survived','Drowned'])
+                my_model = XGBRegressor()
+                X_train = data_provider.train.drop(['Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL'],axis=1)
+                # y_train = data_provider.train[['Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL']]
+                y_train = data_provider.train['Revenue_MF']
                 
+                print X_train.dtypes
+                print X_train.head()
+
+                print y_train.dtypes
+                print y_train.head()
+
+                my_model.fit(X_train, y_train)
+
+                X_true = data_provider.test.drop(['Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL'],axis=1)
+                y_true = data_provider.test['Revenue_MF']
+                y_pred = my_model.predict(X_true)
+                # print "Max error: ", max_error(y_true,y_pred)
+                print "Explained variance score: ", explained_variance_score(y_true,y_pred)
+                print "Mean absolute error: ", mean_absolute_error(y_true,y_pred)
+                print "Mean squared error: ", mean_squared_error(y_true,y_pred)
+
                 pass
 

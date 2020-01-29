@@ -110,6 +110,8 @@ def main(arguments):
             if configuration['model'] == 'vanilla': model = VanillaModel(configuration)
             elif configuration['model'] == 'advanced': model = AdvancedModel(configuration)
             else: raise NotImplementedError
+            
+            model.build_best_prediction()
 
             style = Style(configuration,model)
 
@@ -145,13 +147,12 @@ def main(arguments):
                     if arguments.annotation_format: view.annotate(arguments.annotation_format)
                     document.add_view(view)
 
-            document.draw()
+        #     document.draw()
 
             document.save(serializer)
             configuration['command']=' '.join(sys.argv)
             document.save_config(config)
 
-        #     model.build_best_prediction()
 
         return 0
 

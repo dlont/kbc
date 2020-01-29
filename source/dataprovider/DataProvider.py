@@ -87,7 +87,7 @@ class PandasDataProviderFromCSV(PandasDataProviderFromCSV):
             # self.data = all_data[all_data.Sale_CC == -1]    #predictions data
             # transform data using pipelines
 
-            self.train, self.test = train_test_split(self.data, train_size=self.training_fraction)
+            self.train, self.test = train_test_split(self.data, train_size=self.training_fraction, shuffle=False)
 
 class PandasDataProviderFromCSV_original(PandasDataProviderFromCSV):
         def __init__(self,filename_csv):
@@ -96,8 +96,10 @@ class PandasDataProviderFromCSV_original(PandasDataProviderFromCSV):
             from sklearn.model_selection import train_test_split 
             from sklearn.preprocessing import OneHotEncoder
             self.filename_csv = filename_csv
-            self.training_fraction = 0.5
-            self.data = pd.read_csv(self.filename_csv, index_col='Client')
+            self.training_fraction = 0.7
+            all_data = pd.read_csv(self.filename_csv, index_col='Client')
+            self.data = all_data[all_data.Sale_CC != -1]  #training data
+            # self.data = all_data[all_data.Sale_CC == -1]    #predictions data
             # transform data using pipelines
 
-            self.train, self.test = train_test_split(self.data, train_size=self.training_fraction)
+            self.train, self.test = train_test_split(self.data, train_size=self.training_fraction, shuffle=False)

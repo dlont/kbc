@@ -6,7 +6,7 @@ config={'annotation': 'Modelling data distributions.',
  'model':'vanilla',
  'mode': 'report',
 #  'views':['features_1d_Soc_Dem_p1','features_1d_Inflow_Outflow_p1','features_2d_train_test_correlations_p1'],
- 'views':['features_1d_Soc_Dem_p1','features_1d_Inflow_Outflow_p1','features_1d_Inflow_Outflow_p2', 
+  'views':['features_1d_Soc_Dem_p1','features_1d_Inflow_Outflow_p1','features_1d_Inflow_Outflow_p2', 
   'features_1d_Products_ActBalance_p1', 'features_1d_Products_ActBalance_p2',
   'features_1d_Targets_p1', 'features_2d_Targets_correlations_p1'],
   'features_1d_Soc_Dem_p1':{
