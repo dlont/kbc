@@ -108,6 +108,7 @@ def main(arguments):
 
             model = None
             if configuration['model']['type'] == 'vanilla_regression': model = VanillaModelRegression(configuration)
+            elif configuration['model']['type'] == 'vanilla_LassoLarsIC_regression': model = VanillaModelLassoLarsIC(configuration)
             elif configuration['model']['type'] == 'vanilla_classification': model = VanillaModelClassification(configuration)
             elif configuration['model']['type'] == 'advanced': model = AdvancedModel(configuration)
             else: raise NotImplementedError
@@ -139,6 +140,8 @@ def main(arguments):
                             view = View2dCorrelationsTrain(view_name)
                     elif configuration[view_name]['type'] == 'regression_model_learning_curve':
                             view = ViewModelRegressionLearningCurve(view_name)
+                    elif configuration[view_name]['type'] == 'regression_model_lasso_lars_ic':
+                            view = ViewModelRegressionLassoLarsIC(view_name)
                     elif configuration[view_name]['type'] == 'classification_model_learning_curve':
                             view = ViewModelClassificationLearningCurve(view_name)
                     else: view = View(view_name)

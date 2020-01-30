@@ -207,6 +207,94 @@ class VanillaModelRegression(Model):
 
                 pass
 
+class VanillaModelLassoLarsIC(Model):
+        def __init__(self,configuration):
+                self._configuration = configuration
+                self._objects = {}
+                self._annotation = 'Ridge linear regression with built-in CV'
+                if 'annotation' in self._configuration:
+                        self._annotation = self._configuration['annotation']
+                self.fit_results = None
+                self.Initialize()
+
+        @log_with()
+        def Initialize(self):
+                self.build_best_prediction()
+                pass
+
+        @log_with()
+        def get(self,name):
+                """
+                Factory method
+                """
+                if name in self._objects:
+                        return self._objects[name]
+                else:
+                        return None #provide factory method implementation here
+                return self._objects[name]
+
+        @log_with()
+        def get_data_provider(self,name):
+                """
+                Factory method for data providers
+                """
+                from dataprovider import PandasDataProviderFromCSV_original
+                if name in self._objects:
+                        return self._objects[name]
+                else:
+                        if '.csv' in self._configuration[name]['input_file']:
+                                provider = PandasDataProviderFromCSV_original(self._configuration[name]['input_file'])
+                                self._objects[name] = provider
+                        else: raise NotImplementedError
+                return self._objects[name]
+
+        @log_with()
+        def build_best_prediction(self):
+                print "Building LassoLarsIC linear regression vanilla model!"
+
+                from matplotlib import pyplot
+                from sklearn.linear_model import LassoLarsIC
+                from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
+                
+                target_variable_names = self._configuration['model']['target'][0]
+                data_provider = self.get_data_provider(self._configuration[target_variable_names]['data_provider'])
+
+                input_features_names = self._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+
+                # print X_train.dtypes
+                # print X_train.head()
+                # print X_test.dtypes
+                # print X_test.head()
+
+                # print y_train.dtypes
+                # print y_train.head()
+                # print y_test.dtypes
+                # print y_test.head()
+
+                my_model_aic = LassoLarsIC(criterion='aic')
+                my_model_aic.fit(X_train, y_train)
+                y_pred_aic = my_model_aic.predict(X_test)
+                # print "Max error: ", max_error(y_test,y_pred)
+                print "AIC Explained variance score: ", explained_variance_score(y_test,y_pred_aic)
+                print "AIC Mean absolute error: ", mean_absolute_error(y_test,y_pred_aic)
+                print "AIC Mean squared error: ", mean_squared_error(y_test,y_pred_aic)
+
+                my_model_bic = LassoLarsIC(criterion='bic')
+                my_model_bic.fit(X_train, y_train)
+                y_pred_bic = my_model_bic.predict(X_test)
+                # print "Max error: ", max_error(y_test,y_pred)
+                print "BIC Explained variance score: ", explained_variance_score(y_test,y_pred_bic)
+                print "BIC Mean absolute error: ", mean_absolute_error(y_test,y_pred_bic)
+                print "BIC Mean squared error: ", mean_squared_error(y_test,y_pred_bic)
+
+                self.fit_results = {'aic':my_model_aic, 'bic':my_model_bic}
+
+                pass
 class VanillaModelClassification(Model):
         def __init__(self,configuration):
                 self._configuration = configuration

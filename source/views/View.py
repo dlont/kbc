@@ -369,6 +369,41 @@ class ViewModelRegressionLearningCurve(View):
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
 
+class ViewModelRegressionLassoLarsIC(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                # This is to avoid division by zero while doing np.log10
+                EPSILON = 1e-4
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                pads = axes.flatten()
+                for pad,metric in enumerate(self.model._configuration[self.view_name]['metrics']):
+                        if metric in ['aic','bic']:
+                                alpha = self.model.fit_results[metric].alpha_ + EPSILON
+                                alphas = self.model.fit_results[metric].alphas_ + EPSILON
+                                criterion = self.model.fit_results[metric].criterion_
+                                pads[pad].plot(-np.log10(alphas), criterion, '--', color='r', linewidth=3, label='{} criterion'.format(metric))
+                                pads[pad].axvline(-np.log10(alpha), color='r', linewidth=3, label='alpha: {} estimate'.format(metric))
+                                pads[pad].legend()
+                                pads[pad].set_xlabel('-log(alpha)')
+                                pads[pad].set_ylabel('criterion')
+                                pads[pad].set_title('Information-criterion for model selection')
+                        else: 
+                                logging.error('Unknown metric type: {}'.format(metric))
+                                raise NotImplementedError
+
+                fig.tight_layout()
+                # plt.show()
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
 class ViewModelClassificationLearningCurve(View):
         @log_with()
         def __init__(self,view_name=None):
