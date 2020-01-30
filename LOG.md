@@ -1,5 +1,6 @@
 # TODO
 
+* [ ] **(A)**   30.01.2020 02.45. Incorporate multimodality of `Revenue*` distributions in the models
 * [ ] **(A)**   30.01.2020 00.45. Optimize xgboost regression models
   * [ ] **(A)**   30.01.2020 00.45. 'Revenue_MF'
   * [ ] **(A)**   30.01.2020 00.45. 'Revenue_CC'
@@ -189,6 +190,12 @@ Revenue_CL                      1584 non-null float64
 dtypes: float64(32), int64(3)
 
 ```
+
+# 30.01.2020 02:40
+## Multimodal revenue distributions
+
+I guess, baseline modelling is so bad out of the box because the revenues distributions are multimodal with first mode at 0. This mode corresponds to clients that do not want to
+accept the marketing offer. Somehow I have to explicitely incorporate this information in the model. Perhaps, I can use gaussian mixture to deal with this problem or find a simpler alternative way.
 
 ----------------------------
 ----------------------------
