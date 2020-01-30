@@ -2,6 +2,7 @@
     "python.pythonPath": "/usr/bin/python",
     "python.autoComplete.extraPaths": [
         "${workspaceFolder}/source"
-     ]
-    "python.linting.enabled": true
+     ],
+    "python.linting.enabled": true,
+    "git.untrackedChanges": "separate"
 }
