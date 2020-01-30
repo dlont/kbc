@@ -1,43 +1,57 @@
 # TODO
 
-[] **(A)**   28.01.2020 18.15. Build baseline linear and xgboost models.
+* [ ] **(A)**   30.01.2020 00.45. Optimize xgboost regression models
+  * [ ] **(A)**   30.01.2020 00.45. 'Revenue_MF'
+  * [ ] **(A)**   30.01.2020 00.45. 'Revenue_CC'
+  * [ ] **(A)**   30.01.2020 00.45. 'Revenue_CL'
+* [ ] **(A)**   30.01.2020 00.45. Optimize xgboost classification models
+  * [ ] **(A)**   30.01.2020 00.45. 'Sale_MF'
+  * [ ] **(A)**   30.01.2020 00.45. 'Sale_CC'
+  * [ ] **(A)**   30.01.2020 00.45. 'Sale_CL'
+* [ ] **(B)**   28.01.2020 21.20. Ask Michael if missing entries in `Products_ActBalance` can be defaulted to `0` (see [log note](#missing-values-in-products_actbalance))
+* [ ] **(B)**   29.01.2020 00.55. Make correlation plots with and without suppression of default imputed values.
 
-[] **(B)**   28.01.2020 21.20. Ask Michael if missing entries in `Products_ActBalance` can be defaulted to `0` (see [log note](#missing-values-in-products_actbalance))
-[] **(B)**   29.01.2020 00.55. Make correlation plots with and without suppression of default imputed values.
-
-[] **(C)**   27.01.2020 23:08. Add automatic provenance generation for the output file. In particular, I wanted to do this for the `train_test_datasets.py` script. It would be nice to have a more general class/function for this purpose. See gdoc "Provenance" section https://docs.google.com/document/d/1YvFl1Dnwc3PGkx154Kpo2dYWy-abask3pxOmDC4Mqo8/edit# for more information
-[] **(C1)**  27.01.2020 23:08. I want to have in the provenance metadata file at least the info like: entity, Activity, generatedBy, StartTime, EndTime, md5, git commit.
-[] **(C)**   28.01.2020 23:55. Add legend to the correlation plots. At the moment it doesn't look straightforward.
-[] **(C)**   28.01.2020 02:26. Check if imputation for gender makes a difference for modelling (see [log note](#gender-missing-values))
+* [ ] **(C)**   27.01.2020 23:08. Add automatic provenance generation for the output file. In particular, I wanted to do this for the `train_test_datasets.py` script. It would be nice to have a more general class/function for this purpose. See gdoc "Provenance" section https://docs.google.com/document/d/1YvFl1Dnwc3PGkx154Kpo2dYWy-abask3pxOmDC4Mqo8/edit# for more information
+* [ ] **(C1)**  27.01.2020 23:08. I want to have in the provenance metadata file at least the info like: entity, Activity, generatedBy, StartTime, EndTime, md5, git commit.
+* [ ] **(C)**   28.01.2020 23:55. Add legend to the correlation plots. At the moment it doesn't look straightforward.
+* [ ] **(C)**   28.01.2020 02:26. Check if imputation for gender makes a difference for modelling (see [log note](#gender-missing-values))
 
 ---------------------------
 # Doing  
   
-[] **(A)**   27.01.2020 18:35. Exploratory data analysis 
+* [ ] **(A)**   27.01.2020 18:35. Exploratory data analysis
+  * [ ] **(A)**   29.01.2020 21.10. Check for outliers in data.
+* [ ] **(A)**   28.01.2020 18.15. Build baseline linear and xgboost models.
+  * [x] **(A)**   29.01.2020 21.50. Build xgboost baseline for regression 'Revenue_MF','Revenue_CC','Revenue_CL'.
+  * [x] **(A)**   29.01.2020 21.50. Build xgboost baseline for classification 'Sale_MF', 'Sale_CC', 'Sale_CL'.
+  * [ ] **(A)**   29.01.2020 21.50. Build linear baseline for regression 'Revenue_MF','Revenue_CC','Revenue_CL'.
+  * [ ] **(A)**   29.01.2020 21.50. Build svm baseline for classification 'Sale_MF', 'Sale_CC', 'Sale_CL'.
+  * [ ] **(B)**   29.01.2020 21.50. Build linear baseline for classification.
 
 
 -------------------------------
 # Follow-up
 
-[] **(A)**   28.01.2020 12:50. Ask michael about target variables. Are `Sale*` variables categorial. What do they mean? What `Revenue*` variables mean. Should I build a model for functions `Sale(x1,x2,...)` and `Revenue(x1,x2,...)`?
-
-[] **(B)**   27.01.2020 18:30. Ask Michael if **Client** is consistent across all tables and can be used as the index for joining
-[] **(B)**   27.01.2020 20:45. Ask Michael if the tables are randomly reshuffled in order to avoid data leakage in training/testing datasets
 
 -----------------------------
 # Done 
 
-[X] **(A1)**  27.01.2020 18:35. Convert multiple files into single .csv file that can be fetched into pandas dataframe
-[X] **(A2)**  27.01.2020 18:35. Plot distributions of all features in all tables
-[X] **(A3)**  28.01.2020 18.00. Plot Sex, Age, Tenure
-[X] **(A4)**  28.01.2020 18.00. Plot 'VolumeCred','VolumeCred_CA','TransactionsCred','TransactionsCred_CA','VolumeDeb','VolumeDeb_CA','VolumeDebCash_Card'
-[X] **(A4)**  28.01.2020 18.00. Plot 'VolumeDebCashless_Card','VolumeDeb_PaymentOrder','TransactionsDeb','TransactionsDeb_CA','TransactionsDebCash_Card','TransactionsDebCashless_Card','TransactionsDeb_PaymentOrder'
-[X] **(A5)**  28.01.2020 18.00. Plot 'Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL'
-[X] **(A6)**  28.01.2020 18.00. Plot 'Count_CA','Count_SA','Count_MF','Count_OVD','Count_CC','Count_CL'
-[X] **(A7)**  28.01.2020 18.00. Plot 'ActBal_CA','ActBal_SA','ActBal_MF','ActBal_OVD','ActBal_CC','ActBal_CL'
-[X] **(B)**   27.01.2020 21:43. Ask Michael what is " Inflow/outflow on C/A"? Does C/A stays for current account?
-[X] **(C)**   28.01.2020 00:07. Refactor all occurrences of *`titanic`* symbol in codes
-[X] **(C)**   28.01.2020 00:41. Refactor all `model.build_test_train_*_feature_pad()` methods by moving them to `view` class. This is more logical than having plotting capabilities inside the `model` class
+* [X] **(A1)**  27.01.2020 18:35. Convert multiple files into single .csv file that can be fetched into pandas dataframe
+* [X] **(A2)**  27.01.2020 18:35. Plot distributions of all features in all tables
+* [X] **(A3)**  28.01.2020 18.00. Plot Sex, Age, Tenure
+* [X] **(A4)**  28.01.2020 18.00. Plot 'VolumeCred','VolumeCred_CA','TransactionsCred','TransactionsCred_CA','VolumeDeb','VolumeDeb_CA','VolumeDebCash_Card'
+* [X] **(A4)**  28.01.2020 18.00. Plot 'VolumeDebCashless_Card','VolumeDeb_PaymentOrder','TransactionsDeb','TransactionsDeb_CA','TransactionsDebCash_Card','TransactionsDebCashless_Card','TransactionsDeb_PaymentOrder'
+* [X] **(A5)**  28.01.2020 18.00. Plot 'Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL'
+* [X] **(A6)**  28.01.2020 18.00. Plot 'Count_CA','Count_SA','Count_MF','Count_OVD','Count_CC','Count_CL'
+* [X] **(A7)**  28.01.2020 18.00. Plot 'ActBal_CA','ActBal_SA','ActBal_MF','ActBal_OVD','ActBal_CC','ActBal_CL'
+* [X] **(B)**   27.01.2020 21:43. Ask Michael what is " Inflow/outflow on C/A"? Does C/A stays for current account?
+* [X] **(C)**   28.01.2020 00:07. Refactor all occurrences of *`titanic`* symbol in codes
+* [X] **(C)**   28.01.2020 00:41. Refactor all `model.build_test_train_*_feature_pad()` methods by moving them to `view` class. This is more logical than having plotting capabilities inside the `model` class
+* [X] **(A)**   28.01.2020 12:50. Ask michael about target variables. Are `Sale*` variables categorial. What do they mean? What `Revenue*` variables mean. Should I build a model for functions `Sale(x1,x2,...)` and `Revenue(x1,x2,...)`?
+
+* [X] **(B)**   27.01.2020 18:30. Ask Michael if **Client** is consistent across all tables and can be used as the index for joining
+* [X] **(B)**   27.01.2020 20:45. Ask Michael if the tables are randomly reshuffled in order to avoid data leakage in training/testing datasets
+
 
 ----------------------
 ----------------------
