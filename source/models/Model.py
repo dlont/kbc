@@ -116,6 +116,97 @@ class AdvancedModel(Model):
         #         kaggle_prediction.to_csv('results/2.3pre.csv')
         #         pass
 
+class AdvancedModelRegression(Model):
+        def __init__(self,configuration):
+                self._configuration = configuration
+                self._objects = {}
+                self._annotation = 'Performance comparision of different MVA discriminants'
+                if 'annotation' in self._configuration:
+                        self._annotation = self._configuration['annotation']
+                self.fit_results = None
+                self.Initialize()
+
+        @log_with()
+        def Initialize(self):
+                self.build_best_prediction()
+                pass
+
+        @log_with()
+        def get(self,name):
+                """
+                Factory method
+                """
+                if name in self._objects:
+                        return self._objects[name]
+                else:
+                        return None #provide factory method implementation here
+                return self._objects[name]
+
+        @log_with()
+        def get_data_provider(self,name):
+                """
+                Factory method for data providers
+                """
+                from dataprovider import *
+                if name in self._objects:
+                        return self._objects[name]
+                else:
+                        if '.csv' in self._configuration[name]['input_file']:
+                                if self._configuration[name]['type'] =='PandasDataProviderRespondingClientsRevenueMF': 
+                                        provider = PandasDataProviderRespondingClientsRevenueMF(self._configuration[name]['input_file'])
+                                else: raise NotImplementedError
+                                self._objects[name] = provider
+                        else: raise NotImplementedError
+                return self._objects[name]
+
+        @log_with()
+        def build_best_prediction(self):
+                print "Dummy building vanilla model!"
+
+                from matplotlib import pyplot
+                from xgboost import XGBRegressor, plot_importance
+                # from sklearn.metrics import explained_variance_score, max_error, mean_absolute_error, mean_squared_error
+                from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
+                
+                target_variable_names = self._configuration['model']['target'][0]
+                data_provider = self.get_data_provider(self._configuration['model']['data_provider'])
+
+                input_features_names = self._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+
+                # print X_train.dtypes
+                # print X_train.head()
+                # print X_test.dtypes
+                # print X_test.head()
+
+                # print y_train.dtypes
+                # print y_train.head()
+                # print y_test.dtypes
+                # print y_test.head()
+
+                eval_set = [(X_train, y_train), (X_test, y_test)]
+
+                my_model = XGBRegressor(n_estimators=self._configuration['model']['n_estimators'],
+                                        max_depth=self._configuration['model']['max_depth'],
+                                        learning_rate=self._configuration['model']['learning_rate'],
+                                        verbosity=0)
+                my_model.fit(X_train, y_train, eval_metric=["rmse", "mae"], eval_set=eval_set, verbose=False)
+
+                y_pred = my_model.predict(X_test)
+                # print "Max error: ", max_error(y_test,y_pred)
+                print "Explained variance score: ", explained_variance_score(y_test,y_pred)
+                print "Mean absolute error: ", mean_absolute_error(y_test,y_pred)
+                print "Mean squared error: ", mean_squared_error(y_test,y_pred)
+
+                self.fit_results = my_model.evals_result()
+                # print 'YO importance'
+                # plot_importance(my_model)
+
+                pass
 
 class VanillaModelRegression(Model):
         def __init__(self,configuration):
@@ -168,7 +259,7 @@ class VanillaModelRegression(Model):
                 from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
                 
                 target_variable_names = self._configuration['model']['target'][0]
-                data_provider = self.get_data_provider(self._configuration[target_variable_names]['data_provider'])
+                data_provider = self.get_data_provider(self._configuration['model']['data_provider'])
 
                 input_features_names = self._configuration['model']['input_features']
                 X_train = data_provider.train[input_features_names]

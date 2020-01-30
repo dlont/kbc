@@ -74,6 +74,22 @@ class PandasDataProviderFromCSV(DataProvider):
         self.training_fraction = fraction
         self.train, self.test = train_test_split(self.data , train_size=self.training_fraction)
 
+class PandasDataProviderRespondingClientsRevenueMF(PandasDataProviderFromCSV):
+        def __init__(self,filename_csv):
+            import pandas as pd
+            import numpy as np
+            from sklearn.model_selection import train_test_split 
+            # from sklearn.preprocessing import OneHotEncoder
+            self.filename_csv = filename_csv
+            self.training_fraction = 0.7
+            all_data = pd.read_csv(self.filename_csv, index_col='Client')
+            self.data = all_data[all_data.Sale_CC != -1]  #training data
+            self.data = self.data[self.data.Revenue_MF>0] #select only those client who have non-trivial revenue
+            # self.data = all_data[all_data.Sale_CC == -1]    #predictions data
+            # transform data using pipelines
+
+            self.train, self.test = train_test_split(self.data, train_size=self.training_fraction, shuffle=False)
+
 class PandasDataProviderFromCSV(PandasDataProviderFromCSV):
         def __init__(self,filename_csv):
             import pandas as pd

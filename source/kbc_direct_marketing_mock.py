@@ -111,6 +111,7 @@ def main(arguments):
             elif configuration['model']['type'] == 'vanilla_LassoLarsIC_regression': model = VanillaModelLassoLarsIC(configuration)
             elif configuration['model']['type'] == 'vanilla_classification': model = VanillaModelClassification(configuration)
             elif configuration['model']['type'] == 'advanced': model = AdvancedModel(configuration)
+            elif configuration['model']['type'] == 'advanced_regression': model = AdvancedModelRegression(configuration)
             else: raise NotImplementedError
             
             style = Style(configuration,model)
