@@ -404,6 +404,78 @@ class ViewModelRegressionLassoLarsIC(View):
                 # plt.show()
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
+
+class ViewModelMulticlassClassificationDistributions(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                pads = axes.flatten()
+
+                target_variable_names = self.model._configuration['model']['target']
+                data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
+
+                input_features_names = self.model._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+
+                y_pred_train = self.model.my_model.predict(X_train)
+                y_pred_test  = self.model.my_model.predict(X_test)
+
+                for pad,distribution in enumerate(self.model._configuration[self.view_name]['distributions']):
+                        if distribution == 'classifier':
+                                # Binning configuration
+                                underflow, overflow = self.model._configuration[self.view_name]['style']['under_over_flow']
+                                bins = self.model._configuration[self.view_name]['style']['bins']
+                                bin_centers = bins[0:-1]+np.diff(bins)/2.
+                                logging.debug('bin_centers ({0})={{1}}'.format(self.view_name,bin_centers))
+
+                                # Class 1 training and testing distributions
+                                if any([underflow, overflow]):
+                                        pads[pad].hist(np.clip(y_pred_train, bins[0] if underflow else None, bins[-1] if overflow else None), bins,
+                                        density=True, histtype='stepfilled',
+                                        color=self.model._configuration[self.view_name]['class1_color_train'], 
+                                        label=self.model._configuration[self.view_name]['class1_label_train'], alpha = 0.5)
+                                else:
+                                        pads[pad].hist(y_pred_train, bins, 
+                                        density=True, histtype='stepfilled', 
+                                        color=self.model._configuration[self.view_name]['class1_color_train'], 
+                                        label=self.model._configuration[self.view_name]['class1_label_train'], alpha = 0.5)
+                                hist_testing = np.histogram(y_pred_test, bins)
+                                if any([underflow, overflow]):
+                                        hist_testing = np.histogram(np.clip(y_pred_test, bins[0] if underflow else None, bins[-1] if overflow else None), bins)
+                                points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0]))
+                                points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/float(np.sum(hist_testing[0]))
+                                pads[pad].errorbar(bin_centers, points_testing_y, yerr=points_testing_yerr, marker=self.model._configuration[self.view_name]['class1_marker_test'], 
+                                ls=self.model._configuration[self.view_name]['class1_line_test'], color=self.model._configuration[self.view_name]['class1_color_test'], 
+                                label=self.model._configuration[self.view_name]['class1_label_test'])
+
+                                pads[pad].legend()
+                                # pads[pad].set_ylabel(distribution)
+                                pads[pad].set_xlabel('Classifier output')
+                                pads[pad].set_title('REJECT=0,MF=1,CC=2,CL=3'.format(distribution))
+                        elif distribution == 'test':
+                                pass
+                        else: 
+                                logging.error('Unknown distribution type: {}'.format(distribution))
+                                raise NotImplementedError
+
+                fig.tight_layout()
+                # plt.show()
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
+
 class ViewModelClassificationLearningCurve(View):
         @log_with()
         def __init__(self,view_name=None):

@@ -39,6 +39,7 @@ class AdvancedModelClassification(Model):
                 if 'annotation' in self._configuration:
                         self._annotation = self._configuration['annotation']
                 self.fit_results = None
+                self.my_model = None
                 self.Initialize()
 
         @log_with()
@@ -106,20 +107,20 @@ class AdvancedModelClassification(Model):
 
                 eval_set = [(X_train, y_train), (X_test, y_test)]
 
-                my_model = XGBClassifier(n_estimators=self._configuration['model']['n_estimators'],
+                self.my_model = XGBClassifier(n_estimators=self._configuration['model']['n_estimators'],
                                         max_depth=self._configuration['model']['max_depth'],
                                         learning_rate=self._configuration['model']['learning_rate'],
                                         objective=self._configuration['model']['objective'],
                                         verbosity=0)
-                my_model.fit(X_train, y_train, eval_metric=["merror", "mlogloss"], eval_set=eval_set, verbose=False)
+                self.my_model.fit(X_train, y_train, eval_metric=["merror", "mlogloss"], eval_set=eval_set, verbose=False)
 
-                # y_pred = my_model.predict(X_test)
+                # y_pred = self.my_model.predict(X_test)
                 # print "Max error: ", max_error(y_test,y_pred)
                 # print "Explained variance score: ", explained_variance_score(y_test,y_pred)
                 # print "Mean absolute error: ", mean_absolute_error(y_test,y_pred)
                 # print "Mean squared error: ", mean_squared_error(y_test,y_pred)
 
-                self.fit_results = my_model.evals_result()
+                self.fit_results = self.my_model.evals_result()
 
 
                 pass

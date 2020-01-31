@@ -146,7 +146,9 @@ def main(arguments):
                     elif configuration[view_name]['type'] == 'classification_model_learning_curve':
                             view = ViewModelClassificationLearningCurve(view_name)
                     elif configuration[view_name]['type'] == 'multiclassification_model_learning_curve':
-                            view = ViewModelMulticlassClassificationLearningCurve(view_name)   
+                            view = ViewModelMulticlassClassificationLearningCurve(view_name)
+                    elif configuration[view_name]['type'] == 'multiclassification_model_classifier_distribution':
+                            view = ViewModelMulticlassClassificationDistributions(view_name)
                     else: view = View(view_name)
                     view.set_model(model)
                     view.set_style(style)
