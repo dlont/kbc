@@ -1,0 +1,56 @@
+\documentclass[14pt]{scrartcl}
+\usepackage{rotating}
+\usepackage{pdflscape}
+\usepackage{multirow}
+
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ total={170mm,257mm},
+ right=5mm,
+ left=5mm,
+ top=0mm
+ }
+
+\usepackage{xcolor,colortbl}
+
+%opening
+\title{Propensity models for KBC test data}
+\author{D.~Lontkovskyi}
+
+\newcommand{\T}{\rule{0pt}{2.6ex}}
+\newcommand{\B}{\rule[-1.2ex]{0pt}{0pt}}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Technical report with the outline of the task solution.
+\end{abstract}
+
+To calculated expected revenue of the direct marketing campaign, following simplified ansatz is used:
+\begin{equation}
+    \textmd{E}\left[R_a\right] =  \int d\mathbf{x}\,R_a \left( \textbf{x}|\textrm{respond} \right) \pi\left(\textrm{respond}|\textbf{x}\right) + 
+                                                    R_a(\textbf{x}|\textrm{not respond}) \left(1 - \pi\left(\textrm{respond}|\textbf{x}\right) \right),
+\end{equation}
+where $R_a \left( \textbf{x}|\textrm{respond} \right) \left(R_a \left( \textbf{x}|\textrm{not respond} \right)\right)$ is the revenue from the client characterized
+by the feature vector $\textbf{x}$ that responds (does not respond) to the marketing offer, the subscript index $a$ corresponds to the sort of marketing offer (mutual fund (MF), consumer loan (CL), credit card (CC)); $\pi\left(\textrm{respond}|\textbf{x}\right)$ is the conditional probability that 
+this client will respond to the advertisement, given she has the feature vector $\textbf{x}$.
+
+Assuming that clients that do not wish to respond to the offer do not generate revenue, 
+\begin{equation}
+    R_a(\textbf{x}|\textrm{not respond}) \equiv 0,
+\end{equation} 
+the equation simplifies to
+\begin{equation}
+    \textmd{E}\left[R_a\right] =  \int d\mathbf{x}\,R_a \left( \textbf{x}|\textrm{respond} \right) \pi\left(\textrm{respond}|\textbf{x}\right).
+\end{equation}
+The conditional probability, $\pi\left(\textrm{respond}|\textbf{x}\right)$, and the revenue function, $R_a \left( \textbf{x}|\textrm{respond} \right)$, can be estimated from the dummy data.
+
+\section{Data}
+\section{Outlier removal}
+\section{Client success classifiers}
+\section{Revenue function for responding clients}
+\end{document}
