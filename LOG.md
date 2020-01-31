@@ -260,9 +260,27 @@ print np.sort(outliers_score)[0:20]
 X.iloc[[outliers_score[el]<-18 for el in range(0,len(outliers_score))]]
 #Client
 #1549    133.275357
-
 ```
 
+# 31.01.2020 11.30
+## Pandas dataframe for Multiclass classification
+
+```python
+import pandas as pd
+import numpy as np
+df = pd.read_csv('data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv', index_col='Client')
+def my_f(el):
+     result = -1
+     if el['Sale_MF']==1: result = 1
+     elif el['Sale_CC']==1: result = 2
+     elif el['Sale_CL']==1: result = 3
+     elif el['Sale_MF'] == 0 and el['Sale_CC']==0 and el['Sale_CL']==0: result = 0
+     elif el['Sale_MF'] == -1 or el['Sale_CC']==-1 or el['Sale_CL']==-1: result = -1
+     else: result = np.nan
+     return result
+df['Sale_multiclass'] = df[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:my_f(el),axis=1)
+df['Sale_multiclass'].head()
+```
 ----------------------------
 ----------------------------
 # Miscellaneous 
