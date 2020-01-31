@@ -107,6 +107,39 @@ class PandasDataProviderRespondingClientsRevenueMF(PandasDataProviderFromCSV):
 
             self.train, self.test = train_test_split(self.data, train_size=self.training_fraction, shuffle=False)
 
+def my_f(el):
+    import numpy as np
+    result = -1
+    if el['Sale_MF']==1: result = 1
+    elif el['Sale_CC']==1: result = 2
+    elif el['Sale_CL']==1: result = 3
+    elif el['Sale_MF'] == 0 and el['Sale_CC']==0 and el['Sale_CL']==0: result = 0
+    elif el['Sale_MF'] == -1 or el['Sale_CC']==-1 or el['Sale_CL']==-1: result = -1
+    else: result = np.nan
+    return result
+
+class PandasDataProviderRespondingClientsNoOutliers(PandasDataProviderFromCSV):
+        def __init__(self,filename_csv,remove_all=False):
+            import pandas as pd
+            import numpy as np
+            from sklearn.model_selection import train_test_split 
+            # from sklearn.preprocessing import OneHotEncoder
+            self.filename_csv = filename_csv
+            self.training_fraction = 0.7
+            all_data = pd.read_csv(self.filename_csv, index_col='Client')
+
+            #Add multiclass enconded axis
+            all_data['Sale_Multiclass'] = all_data[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:my_f(el),axis=1)
+
+            self.data = all_data[all_data.Sale_Multiclass != -1]  #training data
+            
+            if remove_all:self.data = self.data.drop([27,43,349,614,374,448,479,617,966,1293,1335,1549])                #drop outliers
+            
+            # self.data = all_data[all_data.Sale_CC == -1]    #predictions data
+            # transform data using pipelines
+
+            self.train, self.test = train_test_split(self.data, train_size=self.training_fraction, shuffle=False)
+
 class PandasDataProviderRespondingClientsNoOutliersRevenueMF(PandasDataProviderFromCSV):
         def __init__(self,filename_csv,remove_all=False):
             import pandas as pd

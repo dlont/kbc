@@ -437,6 +437,38 @@ class ViewModelClassificationLearningCurve(View):
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
 
+class ViewModelMulticlassClassificationLearningCurve(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                pads = axes.flatten()
+                for pad,metric in enumerate(self.model._configuration[self.view_name]['metrics']):
+                        if metric in ["merror", "mlogloss"]:
+                                epochs = len(self.model.fit_results['validation_0'][metric])
+                                x_axis = range(0, epochs)
+                                pads[pad].plot(x_axis, self.model.fit_results['validation_0'][metric], label='Train')
+                                pads[pad].plot(x_axis, self.model.fit_results['validation_1'][metric], label='Test')
+                                pads[pad].legend()
+                                pads[pad].set_ylabel(metric)
+                                pads[pad].set_xlabel('Num trees')
+                                pads[pad].set_title('XGBoost {} Loss'.format(metric))
+                        else: 
+                                logging.error('Unknown metric type: {}'.format(metric))
+                                raise NotImplementedError
+
+                fig.tight_layout()
+                # plt.show()
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
 
 class LatexBeamerView(View):
         @log_with()

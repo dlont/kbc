@@ -31,17 +31,19 @@ class Model(object):
         def predict_kaggle_output(ml_model):
                 pass
 
-class AdvancedModel(Model):
+class AdvancedModelClassification(Model):
         def __init__(self,configuration):
                 self._configuration = configuration
                 self._objects = {}
                 self._annotation = 'Performance comparision of different MVA discriminants'
                 if 'annotation' in self._configuration:
                         self._annotation = self._configuration['annotation']
+                self.fit_results = None
                 self.Initialize()
 
         @log_with()
         def Initialize(self):
+                self.build_best_prediction()
                 pass
 
         @log_with()
@@ -60,36 +62,65 @@ class AdvancedModel(Model):
                 """
                 Factory method for data providers
                 """
-                from dataprovider import PandasDataProviderFromCSV
+                from dataprovider import *
                 if provider_name in self._objects:
                         return self._objects[provider_name]
                 else:
                         if '.csv' in self._configuration[provider_name]['input_file']:
-                                provider = PandasDataProviderFromCSV(self._configuration[provider_name]['input_file'])
+                                if self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClients': 
+                                        raise NotImplementedError
+                                elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliers': 
+                                        provider = PandasDataProviderRespondingClientsNoOutliers(self._configuration[provider_name]['input_file'],
+                                        self._configuration[provider_name]['remove_all'])
+                                else: raise NotImplementedError
                                 self._objects[provider_name] = provider
                         else: raise NotImplementedError
                 return self._objects[provider_name]
   
         @log_with()
         def build_best_prediction(self):
-                print "Dummy building advanced model!"
-                # from xgboost import XGBClassifier
-                # from sklearn.metrics import classification_report
-                # from dataprovider import PandasSurvivedClassSelector, PandasDrownedClassSelector
+                print "Building advanced multiclass XGBoost model with outliers removed!"
+                from xgboost import XGBClassifier
+                # from sklearn.metrics import explained_variance_score, max_error, mean_absolute_error, mean_squared_error
+                from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
                 
-                # data_provider = self.get_data_provider(self._configuration['Age']['data_provider'])
+                target_variable_names = self._configuration['model']['target']
+                data_provider = self.get_data_provider(self._configuration['model']['data_provider'])
 
-                # my_model = XGBClassifier()
-                # X_train, y_train = data_provider.train.drop(['Cabin','Ticket','Name','Survived'],axis=1),data_provider.train['Survived']
-                # # print X_train.dtypes
+                input_features_names = self._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
 
-                # my_model.fit(X_train, y_train)
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
 
-                # X_test, y_test = data_provider.test.drop(['Cabin','Ticket','Name','Survived'],axis=1),data_provider.test['Survived']
+                # print X_train.dtypes
+                # print X_train.head()
+                # print X_test.dtypes
+                # print X_test.head()
+
+                # print y_train.dtypes
+                # print y_train.head()
+                # print y_test.dtypes
+                # print y_test.head()
+
+                eval_set = [(X_train, y_train), (X_test, y_test)]
+
+                my_model = XGBClassifier(n_estimators=self._configuration['model']['n_estimators'],
+                                        max_depth=self._configuration['model']['max_depth'],
+                                        learning_rate=self._configuration['model']['learning_rate'],
+                                        objective=self._configuration['model']['objective'],
+                                        verbosity=0)
+                my_model.fit(X_train, y_train, eval_metric=["merror", "mlogloss"], eval_set=eval_set, verbose=False)
+
                 # y_pred = my_model.predict(X_test)
-                # print classification_report(y_test, y_pred, target_names=['Survived','Drowned'])
+                # print "Max error: ", max_error(y_test,y_pred)
+                # print "Explained variance score: ", explained_variance_score(y_test,y_pred)
+                # print "Mean absolute error: ", mean_absolute_error(y_test,y_pred)
+                # print "Mean squared error: ", mean_squared_error(y_test,y_pred)
 
-                # self.predict_kaggle_output(my_model)
+                self.fit_results = my_model.evals_result()
+
 
                 pass
 

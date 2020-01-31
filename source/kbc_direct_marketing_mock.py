@@ -110,7 +110,7 @@ def main(arguments):
             if configuration['model']['type'] == 'vanilla_regression': model = VanillaModelRegression(configuration)
             elif configuration['model']['type'] == 'vanilla_LassoLarsIC_regression': model = VanillaModelLassoLarsIC(configuration)
             elif configuration['model']['type'] == 'vanilla_classification': model = VanillaModelClassification(configuration)
-            elif configuration['model']['type'] == 'advanced': model = AdvancedModel(configuration)
+            elif configuration['model']['type'] == 'advanced_classification': model = AdvancedModelClassification(configuration)
             elif configuration['model']['type'] == 'advanced_regression': model = AdvancedModelRegression(configuration)
             else: raise NotImplementedError
             
@@ -145,6 +145,8 @@ def main(arguments):
                             view = ViewModelRegressionLassoLarsIC(view_name)
                     elif configuration[view_name]['type'] == 'classification_model_learning_curve':
                             view = ViewModelClassificationLearningCurve(view_name)
+                    elif configuration[view_name]['type'] == 'multiclassification_model_learning_curve':
+                            view = ViewModelMulticlassClassificationLearningCurve(view_name)   
                     else: view = View(view_name)
                     view.set_model(model)
                     view.set_style(style)
