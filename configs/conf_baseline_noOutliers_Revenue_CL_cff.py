@@ -8,7 +8,7 @@ config={
    'type':'advanced_regression',
    'data_provider':'model_data_provider',
    'input_features':['Sex', 'Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'TransactionsCred', 'TransactionsCred_CA', 'VolumeDeb', 'VolumeDeb_CA', 'VolumeDebCash_Card', 'VolumeDebCashless_Card', 'VolumeDeb_PaymentOrder', 'TransactionsDeb', 'TransactionsDeb_CA', 'TransactionsDebCash_Card', 'TransactionsDebCashless_Card', 'TransactionsDeb_PaymentOrder', 'Count_CA', 'Count_SA', 'Count_MF', 'Count_OVD', 'Count_CC', 'Count_CL', 'ActBal_CA', 'ActBal_SA', 'ActBal_MF', 'ActBal_OVD', 'ActBal_CC', 'ActBal_CL'],
-   'target':['Revenue_MF'],
+   'target':['Revenue_CL'],
    'n_estimators':200,
    'max_depth':5,
    'learning_rate':0.01,
@@ -22,7 +22,7 @@ config={
   'learning_curve':{
      'annotation': 'Learning curve XGBoost',
      'type':'regression_model_learning_curve',
-     'output_filename':'Revenue_MF_learning_curve',
+     'output_filename':'Revenue_CL_learning_curve',
      'layout':{'nrows':1, 'ncols':2},
      'size': [8.5,2.5],
      'metrics':['rmse','mae']
@@ -76,48 +76,48 @@ config={
      'features':['Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL']
   },
   'features_2d_Targets_Inputs_correlations_p1':{
-     'annotation': 'Revenue MF VS inputs correlations p1.',
+     'annotation': 'Revenue CL VS inputs correlations p1.',
      'type':'2d_train_correlations',
      'output_filename':'features_2d_Targets_Inputs_correlations_p1',
      'layout':{'nrows':1, 'ncols':2},
      'size': [8.5,5.0],
-     'features':[['Revenue_MF','Age'], ['Revenue_MF','Tenure']]
+     'features':[['Revenue_CL','Age'], ['Revenue_CL','Tenure']]
   },
   'features_2d_Targets_Inputs_correlations_p2':{
-     'annotation': 'Revenue MF VS inputs correlations p2.',
+     'annotation': 'Revenue CL VS inputs correlations p2.',
      'type':'2d_train_correlations',
      'output_filename':'features_2d_Targets_Inputs_correlations_p2',
      'layout':{'nrows':2, 'ncols':3},
      'size': [8.5,5.0],
-     'features':[['Revenue_MF','VolumeCred'],['Revenue_MF','VolumeCred_CA'],
-                 ['Revenue_MF','TransactionsCred'], ['Revenue_MF','TransactionsCred_CA'],
-                 ['Revenue_MF','VolumeDeb'], ['Revenue_MF','VolumeDeb_CA']]
+     'features':[['Revenue_CL','VolumeCred'],['Revenue_CL','VolumeCred_CA'],
+                 ['Revenue_CL','TransactionsCred'], ['Revenue_CL','TransactionsCred_CA'],
+                 ['Revenue_CL','VolumeDeb'], ['Revenue_CL','VolumeDeb_CA']]
   },
   'features_2d_Targets_Inputs_correlations_p3':{
-     'annotation': 'Revenue MF VS inputs correlations p3.',
+     'annotation': 'Revenue CL VS inputs correlations p3.',
      'type':'2d_train_correlations',
      'output_filename':'features_2d_Targets_Inputs_correlations_p3',
      'layout':{'nrows':2, 'ncols':3},
      'size': [8.5,5.0],
-     'features':[['Revenue_MF','VolumeDebCash_Card'], ['Revenue_MF','VolumeDebCashless_Card'], 
-                 ['Revenue_MF','VolumeDeb_PaymentOrder'], ['Revenue_MF','TransactionsDebCash_Card'],
-                 ['Revenue_MF','TransactionsDebCashless_Card'], ['Revenue_MF','TransactionsDeb_PaymentOrder']]
+     'features':[['Revenue_CL','VolumeDebCash_Card'], ['Revenue_CL','VolumeDebCashless_Card'], 
+                 ['Revenue_CL','VolumeDeb_PaymentOrder'], ['Revenue_CL','TransactionsDebCash_Card'],
+                 ['Revenue_CL','TransactionsDebCashless_Card'], ['Revenue_CL','TransactionsDeb_PaymentOrder']]
   },
   'features_2d_Targets_Inputs_correlations_p4':{
-     'annotation': 'Revenue MF VS inputs correlations p4.',
+     'annotation': 'Revenue CL VS inputs correlations p4.',
      'type':'2d_train_correlations',
      'output_filename':'features_2d_Targets_Inputs_correlations_p4',
      'layout':{'nrows':1, 'ncols':2},
      'size': [8.5,5.0],
-     'features':[['Revenue_MF','TransactionsDeb'], ['Revenue_MF','TransactionsDeb_CA']]
+     'features':[['Revenue_CL','TransactionsDeb'], ['Revenue_CL','TransactionsDeb_CA']]
   },
   'features_2d_Targets_correlations_p1':{
-     'annotation': 'Revenue MF VS targets correlations p1.',
+     'annotation': 'Revenue CL VS targets correlations p1.',
      'type':'2d_train_correlations',
      'output_filename':'features_2d_Targets_correlations_p1',
      'layout':{'nrows':1, 'ncols':3},
      'size': [8.5,5.0],
-     'features':[['Revenue_MF','Revenue_CC'],['Revenue_MF','Revenue_CL'],['Revenue_CC','Revenue_CL']]
+     'features':[['Revenue_CL','Revenue_MF'],['Revenue_CL','Revenue_CC'],['Revenue_CC','Revenue_MF']]
   },
   ##########
   'Sex':{
@@ -1039,7 +1039,7 @@ config={
   #############
 
   'model_data_provider':{
-        'type':'PandasDataProviderRespondingClientsNoOutliersRevenueMF',
+        'type':'PandasDataProviderRespondingClientsNoOutliersRevenueCL',
         'remove_all':False,
         'input_file':'data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv'
   }

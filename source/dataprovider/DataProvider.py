@@ -108,7 +108,27 @@ class PandasDataProviderRespondingClientsRevenueMF(PandasDataProviderFromCSV):
             self.train, self.test = train_test_split(self.data, train_size=self.training_fraction, shuffle=False)
 
 class PandasDataProviderRespondingClientsNoOutliersRevenueMF(PandasDataProviderFromCSV):
-        def __init__(self,filename_csv):
+        def __init__(self,filename_csv,remove_all=False):
+            import pandas as pd
+            import numpy as np
+            from sklearn.model_selection import train_test_split 
+            # from sklearn.preprocessing import OneHotEncoder
+            self.filename_csv = filename_csv
+            self.training_fraction = 0.7
+            all_data = pd.read_csv(self.filename_csv, index_col='Client')
+            self.data = all_data[all_data.Sale_MF != -1]  #training data
+            
+            if remove_all:self.data = self.data.drop([27,43,349,614,374,448,479,617,966,1293,1335,1549])                #drop outliers
+            else: self.data = self.data.drop([27,43,349,614])                #drop outliers
+            
+            self.data = self.data[self.data.Revenue_MF>0] #select only those client who have non-trivial revenue
+            # self.data = all_data[all_data.Sale_CC == -1]    #predictions data
+            # transform data using pipelines
+
+            self.train, self.test = train_test_split(self.data, train_size=self.training_fraction, shuffle=False)
+
+class PandasDataProviderRespondingClientsNoOutliersRevenueCC(PandasDataProviderFromCSV):
+        def __init__(self,filename_csv,remove_all=False):
             import pandas as pd
             import numpy as np
             from sklearn.model_selection import train_test_split 
@@ -117,8 +137,31 @@ class PandasDataProviderRespondingClientsNoOutliersRevenueMF(PandasDataProviderF
             self.training_fraction = 0.7
             all_data = pd.read_csv(self.filename_csv, index_col='Client')
             self.data = all_data[all_data.Sale_CC != -1]  #training data
-            self.data = self.data[self.data.Revenue_MF>0] #select only those client who have non-trivial revenue
-            self.data = self.data.drop([27,43,349,614])                #drop outliers
+            
+            if remove_all:self.data = self.data.drop([27,43,349,614,374,448,479,617,966,1293,1335,1549])                #drop outliers
+            else: self.data = self.data.drop([374,448,479,617,966,1293,1335])                #drop outliers
+            
+            self.data = self.data[self.data.Revenue_CC>0] #select only those client who have non-trivial revenue
+            # self.data = all_data[all_data.Sale_CC == -1]    #predictions data
+            # transform data using pipelines
+
+            self.train, self.test = train_test_split(self.data, train_size=self.training_fraction, shuffle=False)
+
+class PandasDataProviderRespondingClientsNoOutliersRevenueCL(PandasDataProviderFromCSV):
+        def __init__(self,filename_csv,remove_all=False):
+            import pandas as pd
+            import numpy as np
+            from sklearn.model_selection import train_test_split 
+            # from sklearn.preprocessing import OneHotEncoder
+            self.filename_csv = filename_csv
+            self.training_fraction = 0.7
+            all_data = pd.read_csv(self.filename_csv, index_col='Client')
+            self.data = all_data[all_data.Sale_CL != -1]  #training data
+            
+            if remove_all:self.data = self.data.drop([27,43,349,614,374,448,479,617,966,1293,1335,1549])                #drop outliers
+            else: self.data = self.data.drop([1549])                #drop outliers
+            
+            self.data = self.data[self.data.Revenue_CL>0] #select only those client who have non-trivial revenue
             # self.data = all_data[all_data.Sale_CC == -1]    #predictions data
             # transform data using pipelines
 

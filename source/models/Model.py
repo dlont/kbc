@@ -56,19 +56,19 @@ class AdvancedModel(Model):
                 return self._objects[name]
 
         @log_with()
-        def get_data_provider(self,name):
+        def get_data_provider(self,provider_name):
                 """
                 Factory method for data providers
                 """
                 from dataprovider import PandasDataProviderFromCSV
-                if name in self._objects:
-                        return self._objects[name]
+                if provider_name in self._objects:
+                        return self._objects[provider_name]
                 else:
-                        if '.csv' in self._configuration[name]['input_file']:
-                                provider = PandasDataProviderFromCSV(self._configuration[name]['input_file'])
-                                self._objects[name] = provider
+                        if '.csv' in self._configuration[provider_name]['input_file']:
+                                provider = PandasDataProviderFromCSV(self._configuration[provider_name]['input_file'])
+                                self._objects[provider_name] = provider
                         else: raise NotImplementedError
-                return self._objects[name]
+                return self._objects[provider_name]
   
         @log_with()
         def build_best_prediction(self):
@@ -143,23 +143,30 @@ class AdvancedModelRegression(Model):
                 return self._objects[name]
 
         @log_with()
-        def get_data_provider(self,name):
+        def get_data_provider(self,provider_name):
                 """
                 Factory method for data providers
                 """
                 from dataprovider import *
-                if name in self._objects:
-                        return self._objects[name]
+                if provider_name in self._objects:
+                        return self._objects[provider_name]
                 else:
-                        if '.csv' in self._configuration[name]['input_file']:
-                                if self._configuration[name]['type'] =='PandasDataProviderRespondingClientsRevenueMF': 
-                                        provider = PandasDataProviderRespondingClientsRevenueMF(self._configuration[name]['input_file'])
-                                elif self._configuration[name]['type'] =='PandasDataProviderRespondingClientsNoOutliersRevenueMF': 
-                                        provider = PandasDataProviderRespondingClientsNoOutliersRevenueMF(self._configuration[name]['input_file'])
+                        if '.csv' in self._configuration[provider_name]['input_file']:
+                                if self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsRevenueMF': 
+                                        provider = PandasDataProviderRespondingClientsRevenueMF(self._configuration[provider_name]['input_file'])
+                                elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliersRevenueMF': 
+                                        provider = PandasDataProviderRespondingClientsNoOutliersRevenueMF(self._configuration[provider_name]['input_file'],
+                                        self._configuration[provider_name]['remove_all'])
+                                elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliersRevenueCC': 
+                                        provider = PandasDataProviderRespondingClientsNoOutliersRevenueCC(self._configuration[provider_name]['input_file'],
+                                        self._configuration[provider_name]['remove_all'])
+                                elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliersRevenueCL': 
+                                        provider = PandasDataProviderRespondingClientsNoOutliersRevenueCL(self._configuration[provider_name]['input_file'],
+                                        self._configuration[provider_name]['remove_all'])
                                 else: raise NotImplementedError
-                                self._objects[name] = provider
+                                self._objects[provider_name] = provider
                         else: raise NotImplementedError
-                return self._objects[name]
+                return self._objects[provider_name]
 
         @log_with()
         def build_best_prediction(self):
@@ -237,19 +244,19 @@ class VanillaModelRegression(Model):
                 return self._objects[name]
 
         @log_with()
-        def get_data_provider(self,name):
+        def get_data_provider(self,provider_name):
                 """
                 Factory method for data providers
                 """
                 from dataprovider import PandasDataProviderFromCSV_original
-                if name in self._objects:
-                        return self._objects[name]
+                if provider_name in self._objects:
+                        return self._objects[provider_name]
                 else:
-                        if '.csv' in self._configuration[name]['input_file']:
-                                provider = PandasDataProviderFromCSV_original(self._configuration[name]['input_file'])
-                                self._objects[name] = provider
+                        if '.csv' in self._configuration[provider_name]['input_file']:
+                                provider = PandasDataProviderFromCSV_original(self._configuration[provider_name]['input_file'])
+                                self._objects[provider_name] = provider
                         else: raise NotImplementedError
-                return self._objects[name]
+                return self._objects[provider_name]
 
         @log_with()
         def build_best_prediction(self):
@@ -327,19 +334,19 @@ class VanillaModelLassoLarsIC(Model):
                 return self._objects[name]
 
         @log_with()
-        def get_data_provider(self,name):
+        def get_data_provider(self,provider_name):
                 """
                 Factory method for data providers
                 """
                 from dataprovider import PandasDataProviderFromCSV_original
-                if name in self._objects:
-                        return self._objects[name]
+                if provider_name in self._objects:
+                        return self._objects[provider_name]
                 else:
-                        if '.csv' in self._configuration[name]['input_file']:
-                                provider = PandasDataProviderFromCSV_original(self._configuration[name]['input_file'])
-                                self._objects[name] = provider
+                        if '.csv' in self._configuration[provider_name]['input_file']:
+                                provider = PandasDataProviderFromCSV_original(self._configuration[provider_name]['input_file'])
+                                self._objects[provider_name] = provider
                         else: raise NotImplementedError
-                return self._objects[name]
+                return self._objects[provider_name]
 
         @log_with()
         def build_best_prediction(self):
@@ -415,19 +422,19 @@ class VanillaModelClassification(Model):
                 return self._objects[name]
 
         @log_with()
-        def get_data_provider(self,name):
+        def get_data_provider(self,provider_name):
                 """
                 Factory method for data providers
                 """
                 from dataprovider import PandasDataProviderFromCSV_original
-                if name in self._objects:
-                        return self._objects[name]
+                if provider_name in self._objects:
+                        return self._objects[provider_name]
                 else:
-                        if '.csv' in self._configuration[name]['input_file']:
-                                provider = PandasDataProviderFromCSV_original(self._configuration[name]['input_file'])
-                                self._objects[name] = provider
+                        if '.csv' in self._configuration[provider_name]['input_file']:
+                                provider = PandasDataProviderFromCSV_original(self._configuration[provider_name]['input_file'])
+                                self._objects[provider_name] = provider
                         else: raise NotImplementedError
-                return self._objects[name]
+                return self._objects[provider_name]
 
         @log_with()
         def build_best_prediction(self):
