@@ -154,6 +154,8 @@ class AdvancedModelRegression(Model):
                         if '.csv' in self._configuration[name]['input_file']:
                                 if self._configuration[name]['type'] =='PandasDataProviderRespondingClientsRevenueMF': 
                                         provider = PandasDataProviderRespondingClientsRevenueMF(self._configuration[name]['input_file'])
+                                elif self._configuration[name]['type'] =='PandasDataProviderRespondingClientsNoOutliersRevenueMF': 
+                                        provider = PandasDataProviderRespondingClientsNoOutliersRevenueMF(self._configuration[name]['input_file'])
                                 else: raise NotImplementedError
                                 self._objects[name] = provider
                         else: raise NotImplementedError

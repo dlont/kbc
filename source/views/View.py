@@ -95,7 +95,7 @@ class View2dCorrelationsTrain(View):
                 #         if self.model._configuration[feature_tup[0]]['style']['logx']: ax.set_xscale("log")
                 # if 'logy' in self.model._configuration[feature_tup[1]]['style']: 
                 #         if self.model._configuration[feature_tup[1]]['style']['logy']: ax.set_yscale("log")
-                ax.set_title('{0}:{1}'.format(*feature_tup))
+                ax.set_title('{0}:\n{1}'.format(*feature_tup))
 
         @log_with()
         def build_train_correlation_pad(self, ax, feature_tup):
@@ -115,14 +115,14 @@ class View2dCorrelationsTrain(View):
                 class1_selector_f1 = self.model._configuration[feature_tup[1]]['class1']
                 # class2_selector_f1  = self.model._configuration[feature_tup[1]]['class2']
 
-                class1_training_f0 = list(data_provider_f0.get_training_examples(feature_tup[0],class1_selector_f0))
-                class1_training_f1 = list(data_provider_f1.get_training_examples(feature_tup[1],class1_selector_f1))
+                class1_training_f0 = list(data_provider_f0.get_training_testing_examples(feature_tup[0],class1_selector_f0))
+                class1_training_f1 = list(data_provider_f1.get_training_testing_examples(feature_tup[1],class1_selector_f1))
                 ax.scatter(class1_training_f0, class1_training_f1,
                                 color=self.model._configuration[feature_tup[0]]['class1_color_train'],
                                 label=self.model._configuration[feature_tup[0]]['class1_label_train'], alpha = 0.5)
 
-                # class2_training_f0 = list(data_provider_f0.get_training_examples(feature_tup[0],class2_selector_f0))
-                # class2_training_f1 = list(data_provider_f1.get_training_examples(feature_tup[1],class2_selector_f1))
+                # class2_training_f0 = list(data_provider_f0.get_training_testing_examples(feature_tup[0],class2_selector_f0))
+                # class2_training_f1 = list(data_provider_f1.get_training_testing_examples(feature_tup[1],class2_selector_f1))
                 # ax.scatter(class2_training_f0, class2_training_f1,
                 #                 color=self.model._configuration[feature_tup[0]]['class2_color_train'],
                 #                 label=self.model._configuration[feature_tup[0]]['class2_label_train'], alpha = 0.5)
@@ -143,7 +143,7 @@ class View2dCorrelationsTrain(View):
                         if True:
                                 self.build_train_correlation_pad(pads[pad],tuple(features))
                         else: 
-                                logging.error('Unknown feature type: {}'.format(self.model._configuration[feature]['style']['type']))
+                                # logging.error('Unknown feature type: {}'.format(self.model._configuration[feature]['style']['type']))
                                 raise NotImplementedError
 
                 fig.tight_layout()

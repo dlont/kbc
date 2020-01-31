@@ -1040,7 +1040,7 @@ config={
   #############
 
   'model_data_provider':{
-        'type':'PandasDataProviderRespondingClientsRevenueMF',
+        'type':'PandasDataProviderRespondingClientsNoOutliersRevenueMF',
         'input_file':'data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv'
   }
  }
