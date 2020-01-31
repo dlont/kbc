@@ -4,3 +4,11 @@ build/
 scons-3.1.2-install/
 source/uml/
 *.pyc
+
+report/main.aux
+report/main.fdb_latexmk
+report/main.fls
+report/main.log
+report/main.pdf
+report/main.synctex.gz
+
