@@ -129,15 +129,20 @@ class PandasDataProviderRespondingClientsNoOutliers(PandasDataProviderFromCSV):
             import pandas as pd
             import numpy as np
             from sklearn.model_selection import train_test_split 
+            from sklearn.preprocessing import label_binarize
             # from sklearn.preprocessing import OneHotEncoder
             self.filename_csv = filename_csv
             self.training_fraction = 0.7
             all_data = pd.read_csv(self.filename_csv, index_col='Client')
 
-            #Add multiclass enconded axis
-            all_data['Sale_Multiclass'] = all_data[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:self.ordinal_enconding(el),axis=1)
+            #Add multiclass enconded axis. This enconding is bad since it results in overlaping classes. DO NOT USE!
+            # all_data['Sale_Multiclass'] = all_data[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:self.ordinal_enconding(el),axis=1)
 
+            #Add multiclass binary encoding
+            all_data['Sale_Multiclass'] = all_data[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:self.binary_coding(el),axis=1)
             self.data = all_data[all_data.Sale_Multiclass != -1]  #training data
+            # all_data['Sale_Multiclass'] = label_binarize(all_data[['Sale_MF','Sale_CC','Sale_CL']],[])
+
             
             if remove_all:self.data = self.data.drop([27,43,349,614,374,448,479,617,966,1293,1335,1549])                #drop outliers
             
@@ -152,6 +157,9 @@ class PandasDataProviderRespondingClientsNoOutliers(PandasDataProviderFromCSV):
             self.train, self.test = train_test_split(self.data, train_size=self.training_fraction, shuffle=False)
 
         def ordinal_enconding(self,el):
+            '''
+            This is very bad encoding resulting in overlaping classes. DO NOT USE!
+            '''
             import numpy as np
             result = -1
             if el['Sale_MF']==1: result = 1
@@ -160,6 +168,16 @@ class PandasDataProviderRespondingClientsNoOutliers(PandasDataProviderFromCSV):
             elif el['Sale_MF'] == 0 and el['Sale_CC']==0 and el['Sale_CL']==0: result = 0
             elif el['Sale_MF'] == -1 or el['Sale_CC']==-1 or el['Sale_CL']==-1: result = -1
             else: result = np.nan
+            return result
+            
+        def binary_coding(self,el):
+            '''
+            Improved coding of all possible Sale_MF,Sale_CC,Sale_CL options
+            '''
+            import numpy as np
+            result = -1
+            if el['Sale_MF'] == -1 or el['Sale_CC']==-1 or el['Sale_CL']==-1: result = -1
+            else: result = el['Sale_MF']*4 + el['Sale_CC']*2 + el['Sale_CL']
             return result
 
 class PandasDataProviderRespondingClientsNoOutliersRevenueMF(PandasDataProviderFromCSV):
