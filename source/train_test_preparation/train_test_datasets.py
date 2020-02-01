@@ -60,7 +60,7 @@ def main(arguments):
     if 'dropna' in configuration:
         df_final = df_final.dropna(subset=configuration['dropna'])
 
-    print df_final.sort_values(by='Client').head()
+    print (df_final.sort_values(by='Client').head())
 
     # Output entire dataset to file
     df_final.to_csv(configuration['output_file']['file'])

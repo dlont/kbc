@@ -82,7 +82,7 @@ class AdvancedModelClassificationRF(Model):
   
         @log_with()
         def build_best_prediction(self):
-                print "Building advanced multiclass RF model with outliers removed!"
+                print("Building advanced multiclass RF model with outliers removed!")
                 from sklearn.ensemble import RandomForestClassifier
                 from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
                 
@@ -115,9 +115,9 @@ class AdvancedModelClassificationRF(Model):
                 self.my_model.fit(X_train, y_train)
 
                 from sklearn.inspection import permutation_importance
-                result = permutation_importance(clf, X_train, y_train, n_repeats=10,random_state=42)
+                result = permutation_importance(self.my_model, X_train, y_train, n_repeats=10,random_state=42)
                 perm_sorted_idx = result.importances_mean.argsort()
-                print perm_sorted_idx
+                print(perm_sorted_idx)
 
                 # y_pred = self.my_model.predict(X_test)
                 # print "Max error: ", max_error(y_test,y_pred)
@@ -178,7 +178,7 @@ class AdvancedModelClassificationMLP(Model):
   
         @log_with()
         def build_best_prediction(self):
-                print "Building advanced multiclass MLP model with outliers removed!"
+                print("Building advanced multiclass MLP model with outliers removed!")
                 from sklearn.neural_network import MLPClassifier
                 from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
                 
@@ -266,7 +266,7 @@ class AdvancedModelClassificationSVC(Model):
   
         @log_with()
         def build_best_prediction(self):
-                print "Building advanced multiclass SVC model with outliers removed!"
+                print("Building advanced multiclass SVC model with outliers removed!")
                 from sklearn import svm
                 from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
                 
@@ -355,7 +355,7 @@ class AdvancedModelClassification(Model):
   
         @log_with()
         def build_best_prediction(self):
-                print "Building advanced multiclass XGBoost model with outliers removed!"
+                print("Building advanced multiclass XGBoost model with outliers removed!")
                 from xgboost import XGBClassifier
                 from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
                 
@@ -475,7 +475,7 @@ class AdvancedModelRegression(Model):
 
         @log_with()
         def build_best_prediction(self):
-                print "Dummy building vanilla model!"
+                print("Dummy building vanilla model!")
 
                 from matplotlib import pyplot
                 from xgboost import XGBRegressor, plot_importance
@@ -512,9 +512,9 @@ class AdvancedModelRegression(Model):
 
                 y_pred = my_model.predict(X_test)
                 # print "Max error: ", max_error(y_test,y_pred)
-                print "Explained variance score: ", explained_variance_score(y_test,y_pred)
-                print "Mean absolute error: ", mean_absolute_error(y_test,y_pred)
-                print "Mean squared error: ", mean_squared_error(y_test,y_pred)
+                print ("Explained variance score: ", explained_variance_score(y_test,y_pred))
+                print ("Mean absolute error: ", mean_absolute_error(y_test,y_pred))
+                print ("Mean squared error: ", mean_squared_error(y_test,y_pred))
 
                 self.fit_results = my_model.evals_result()
                 # print 'YO importance'
@@ -565,7 +565,7 @@ class VanillaModelRegression(Model):
 
         @log_with()
         def build_best_prediction(self):
-                print "Dummy building vanilla model!"
+                print ("Dummy building vanilla model!")
 
                 from matplotlib import pyplot
                 from xgboost import XGBRegressor, plot_importance
@@ -602,9 +602,9 @@ class VanillaModelRegression(Model):
 
                 y_pred = my_model.predict(X_test)
                 # print "Max error: ", max_error(y_test,y_pred)
-                print "Explained variance score: ", explained_variance_score(y_test,y_pred)
-                print "Mean absolute error: ", mean_absolute_error(y_test,y_pred)
-                print "Mean squared error: ", mean_squared_error(y_test,y_pred)
+                print ("Explained variance score: ", explained_variance_score(y_test,y_pred))
+                print ("Mean absolute error: ", mean_absolute_error(y_test,y_pred))
+                print ("Mean squared error: ", mean_squared_error(y_test,y_pred))
 
                 self.fit_results = my_model.evals_result()
                 # print 'YO importance'
@@ -655,7 +655,7 @@ class VanillaModelLassoLarsIC(Model):
 
         @log_with()
         def build_best_prediction(self):
-                print "Building LassoLarsIC linear regression vanilla model!"
+                print ("Building LassoLarsIC linear regression vanilla model!")
 
                 from matplotlib import pyplot
                 from sklearn.linear_model import LassoLarsIC
@@ -685,17 +685,17 @@ class VanillaModelLassoLarsIC(Model):
                 my_model_aic.fit(X_train, y_train)
                 y_pred_aic = my_model_aic.predict(X_test)
                 # print "Max error: ", max_error(y_test,y_pred)
-                print "AIC Explained variance score: ", explained_variance_score(y_test,y_pred_aic)
-                print "AIC Mean absolute error: ", mean_absolute_error(y_test,y_pred_aic)
-                print "AIC Mean squared error: ", mean_squared_error(y_test,y_pred_aic)
+                print ("AIC Explained variance score: ", explained_variance_score(y_test,y_pred_aic))
+                print ("AIC Mean absolute error: ", mean_absolute_error(y_test,y_pred_aic))
+                print ("AIC Mean squared error: ", mean_squared_error(y_test,y_pred_aic))
 
                 my_model_bic = LassoLarsIC(criterion='bic')
                 my_model_bic.fit(X_train, y_train)
                 y_pred_bic = my_model_bic.predict(X_test)
                 # print "Max error: ", max_error(y_test,y_pred)
-                print "BIC Explained variance score: ", explained_variance_score(y_test,y_pred_bic)
-                print "BIC Mean absolute error: ", mean_absolute_error(y_test,y_pred_bic)
-                print "BIC Mean squared error: ", mean_squared_error(y_test,y_pred_bic)
+                print ("BIC Explained variance score: ", explained_variance_score(y_test,y_pred_bic))
+                print ("BIC Mean absolute error: ", mean_absolute_error(y_test,y_pred_bic))
+                print ("BIC Mean squared error: ", mean_squared_error(y_test,y_pred_bic))
 
                 self.fit_results = {'aic':my_model_aic, 'bic':my_model_bic}
 
@@ -743,7 +743,7 @@ class VanillaModelClassification(Model):
 
         @log_with()
         def build_best_prediction(self):
-                print "Dummy building vanilla model!"
+                print ("Dummy building vanilla model!")
 
                 from xgboost import XGBClassifier
                 # from sklearn.metrics import explained_variance_score, max_error, mean_absolute_error, mean_squared_error

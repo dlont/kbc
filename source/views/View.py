@@ -46,9 +46,9 @@ class View(object):
                         normal_text = "\033[0;37;40m"
                         if self.view_name in self.model._configuration:
                                 if 'annotation' in self.model._configuration[self.view_name]:
-                                        print "\n".join(textwrap.wrap(bcolors.OKBLUE+
-                                                self.model._configuration[self.view_name]['annotation'].encode('ascii')+
-                                                bcolors.ENDC, 120))
+                                        print("\n".join(textwrap.wrap(f"bcolors.OKBLUE"+
+                                                self.model._configuration[self.view_name]['annotation']+
+                                                f"bcolors.ENDC", 120)))
                 elif type == "tex":
                         logging.warning("Annotation format: {}. Not implemented yet!".format(type))
                 elif type == "md":
@@ -770,7 +770,7 @@ class ViewModelConfusionMatrix(View):
                 else:
                         print('Confusion matrix, without normalization')
 
-                print cm
+                print(cm)
 
                 im = axes.imshow(cm, interpolation='nearest', cmap=cmap)
                 axes.figure.colorbar(im, ax=axes)
@@ -908,9 +908,9 @@ class LatexBeamerView(View):
                 if type == "screen":
                         bright_green_text = "\033[1;32;40m"
                         normal_text = "\033[0;37;40m"
-                        print "\n".join(textwrap.wrap(bcolors.OKBLUE+
-                                                self.model._annotation.encode('ascii')+
-                                                bcolors.ENDC, 120))
+                        print("\n".join(textwrap.wrap(f"bcolors.OKBLUE"+
+                                                self.model._annotation+
+                                                f"bcolors.ENDC", 120)))
                 elif type == "tex":
                         logging.warning("Annotation format: {}. Not implemented yet!".format(type))
                 elif type == "md":
@@ -921,7 +921,7 @@ class LatexBeamerView(View):
         @log_with()
         def draw(self):
                 self.Init()
-		for view in self.views: view.draw()
+                for view in self.views: view.draw()
                 logging.debug( pp.pformat(self.model._configuration) )
                 subprocess.call(["pdflatex", "-interaction=nonstopmode", "-output-directory={}".format(self._outputfolder), 
                                  self.model._configuration['latex_main']])
@@ -953,9 +953,7 @@ class LatexReportView(View):
                 if type == "screen":
                         bright_green_text = "\033[1;32;40m"
                         normal_text = "\033[0;37;40m"
-                        print "\n".join(textwrap.wrap(bcolors.OKBLUE+
-                                                self.model._annotation.encode('ascii')+
-                                                bcolors.ENDC, 120))
+                        print("\n".join(textwrap.wrap(f"{bcolors.OKBLUE}"+self.model._annotation+f"{bcolors.ENDC}", 120)))
                 elif type == "tex":
                         logging.warning("Annotation format: {}. Not implemented yet!".format(type))
                 elif type == "md":
@@ -966,7 +964,7 @@ class LatexReportView(View):
         @log_with()
         def draw(self):
                 self.Init()
-		for view in self.views: view.draw()
+                for view in self.views: view.draw()
                 logging.debug( pp.pformat(self.model._configuration) )
                 # subprocess.call(["pdflatex", "-interaction=nonstopmode", "-output-directory={}".format(self._outputfolder),
                                 #  self.model._configuration['latex_main']])

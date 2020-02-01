@@ -16,8 +16,6 @@ import subprocess
 import logging
 import json
 
-import ROOT as rt
-
 # My imports
 from models import *
 from views import *
@@ -121,10 +119,10 @@ def main(arguments):
 
             document = None
             if configuration['mode'] == 'beamer':
-                    print "beamer option is not implemented!"
+                    print ("beamer option is not implemented!")
                     document = LatexBeamerView()
             elif configuration['mode'] == 'report':
-                    print "report option is not implemented!"
+                    print ("report option is not implemented!")
                     document = LatexReportView()
             else: raise NotImplementedError
             document.set_model(model)

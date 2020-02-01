@@ -50,7 +50,7 @@ def main(arguments):
     # Join different tables
     df_final    = df_Soc_Dem.join([df_In_Out,df_Products,df_Sales])
 
-    print df_final.sort_values(by='Client').head()
+    print (df_final.sort_values(by='Client').head())
 
     # Split joined dataset into training and testing parts
     df_final_train, df_final_test = train_test_split(df_final, train_size=configuration['training_fraction'])
