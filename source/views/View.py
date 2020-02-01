@@ -548,6 +548,94 @@ class ViewModelMulticlassProbabilityCorrelations(View):
                 for name in self.get_outfile_name(): plt.savefig(name)
                 plt.close(fig)
 
+class ViewModelConfusionMatrix(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                # fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+                fig, axes = plt.subplots()
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                # pads = axes.flatten()
+
+                target_variable_names = self.model._configuration['model']['target']
+                data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
+
+                input_features_names = self.model._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+                y_pred = self.model.my_model.predict(X_test)
+
+                normalize = True
+                cmap=plt.cm.Blues
+                titles_options = [("Confusion matrix, without normalization", None),
+                                  ("Normalized confusion matrix", 'true')]
+                from sklearn.metrics import confusion_matrix
+                from sklearn.utils.multiclass import unique_labels
+                # Compute confusion matrix
+                cm = confusion_matrix(y_test, y_pred)
+                # Only use the labels that appear in the data
+                classes = [0,1,2,3]
+                # classes = classes[unique_labels(y_test, y_pred)]
+                if normalize:
+                        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+                        print("Normalized confusion matrix")
+                else:
+                        print('Confusion matrix, without normalization')
+
+                print cm
+
+                im = axes.imshow(cm, interpolation='nearest', cmap=cmap)
+                axes.figure.colorbar(im, ax=axes)
+                # We want to show all ticks...
+                axes.set(xticks=np.arange(cm.shape[1]),
+                        yticks=np.arange(cm.shape[0]),
+                        # ... and label them with the respective list entries
+                        xticklabels=classes, yticklabels=classes,
+                        title=titles_options[1][0],
+                        ylabel='True label',
+                        xlabel='Predicted label')
+
+                # Rotate the tick labels and set their alignment.
+                plt.setp(axes.get_xticklabels(), rotation=45, ha="right",
+                        rotation_mode="anchor")
+
+                # Loop over data dimensions and create text annotations.
+                fmt = '.2f' if normalize else 'd'
+                thresh = cm.max() / 2.
+                for i in range(cm.shape[0]):
+                        for j in range(cm.shape[1]):
+                                axes.text(j, i, format(cm[i, j], fmt),
+                                        ha="center", va="center",
+                                        color="white" if cm[i, j] > thresh else "black")
+                # fig.tight_layout()
+                # return ax
+
+                        # pads[0] = disp.ax_
+                        # pads[pad].set_xlabel(self.model._configuration[self.view_name][distribution]['xlabel'])
+                        # pads[pad].set_ylabel(self.model._configuration[self.view_name][distribution]['ylabel'])
+
+
+                        pass
+                        # else: 
+                        #         logging.error('Unknown distribution type: {}'.format(distribution))
+                        #         raise NotImplementedError
+
+                fig.tight_layout()
+                # plt.show()
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
+
 class ViewModelClassificationLearningCurve(View):
         @log_with()
         def __init__(self,view_name=None):

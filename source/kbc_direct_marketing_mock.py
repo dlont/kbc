@@ -151,6 +151,8 @@ def main(arguments):
                             view = ViewModelMulticlassClassificationDistributions(view_name)
                     elif configuration[view_name]['type'] == 'multiclassification_prob_correlations':
                             view = ViewModelMulticlassProbabilityCorrelations(view_name)
+                    elif configuration[view_name]['type'] == 'multiclassification_confusion_matrix':
+                            view = ViewModelConfusionMatrix(view_name)
                     else: view = View(view_name)
                     view.set_model(model)
                     view.set_style(style)

@@ -17,7 +17,7 @@ config={
    'num_class':3
   },
   'mode': 'report',
-  'views':['learning_curve','output_classifier','prob_correlations'],
+  'views':['learning_curve','output_classifier','prob_correlations','confusion_matrix'],
   'learning_curve':{
      'annotation': 'Learning curve XGBoost',
      'type':'multiclassification_learning_curve',
@@ -46,6 +46,13 @@ config={
      'class1_color_test':'r',
      'class1_label_train':'Train',
      'class1_label_test':'Test',
+  },
+  'confusion_matrix':{
+     'annotation': 'Classifier confusion matrix',
+     'type':'multiclassification_confusion_matrix',
+     'output_filename':'multiclass_confusion_matrix',
+     'layout':{'nrows':1, 'ncols':2},
+     'size': [8.5,5.0],
   },
   'prob_correlations':{
      'annotation': 'Classifier train/test samples',
