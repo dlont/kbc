@@ -507,176 +507,40 @@ class ViewModelMulticlassProbabilityCorrelations(View):
                 y_test = data_provider.test[target_variable_names]
 
                 for pad,distribution in enumerate(self.model._configuration[self.view_name]['distributions']):
-                        if distribution == 'correlation_1':
-                                y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                                y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
+                        y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
+                        y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
 
-                                class1_training_f1 = y_prob_train[::,1] # Probability to be class 1
-                                class1_training_f0 = y_prob_train[::,0] # Probability to be class 0
-                                pads[pad].scatter(class1_training_f1, class1_training_f0,
-                                                color=self.model._configuration[self.view_name][distribution]['class0_color_train'],
-                                                label=self.model._configuration[self.view_name]['class0_label_train'],
-                                                marker=self.model._configuration[self.view_name]['class0_marker_train'], alpha = 0.5)
+                        feature_1, feature_2 = self.model._configuration[self.view_name][distribution]['features_id'][0]
+                        class1_training_f1 = y_prob_train[::,feature_1]
+                        class1_training_f2 = y_prob_train[::,feature_2]
+                        pads[pad].scatter(class1_training_f1, class1_training_f2,
+                                        color=self.model._configuration[self.view_name][distribution]['class0_color_train'],
+                                        label=self.model._configuration[self.view_name][distribution]['class0_label_train'],
+                                        marker=self.model._configuration[self.view_name][distribution]['class0_marker_train'], alpha = 0.5)
 
-                                # class1_testing_f1 = y_prob_test[::,1] # Probability to be class 1
-                                # class1_testing_f0 = y_prob_test[::,0] # Probability to be class 0
-                                # pads[pad].scatter(class1_testing_f1, class1_testing_f0,
-                                #                 color=self.model._configuration[self.view_name]['class0_color_test'],
-                                #                 label=self.model._configuration[self.view_name]['class0_label_test'],
-                                #                 marker=self.model._configuration[self.view_name]['class0_marker_test'], alpha = 0.5)
-                                
-                                y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                                y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
+                        feature_1, feature_2 = self.model._configuration[self.view_name][distribution]['features_id'][1]
+                        class1_training_f1 = y_prob_train[::,feature_1] 
+                        class1_training_f2 = y_prob_train[::,feature_2] 
+                        pads[pad].scatter(class1_training_f1, class1_training_f2,
+                                        color=self.model._configuration[self.view_name][distribution]['class1_color_train'],
+                                        label=self.model._configuration[self.view_name][distribution]['class1_label_train'],
+                                        marker=self.model._configuration[self.view_name][distribution]['class1_marker_train'], alpha = 0.5)
 
-                                class1_training_f1 = y_prob_train[::,1] # Probability to be class 1
-                                class1_training_f2 = y_prob_train[::,2] # Probability to be class 2
-                                pads[pad].scatter(class1_training_f1, class1_training_f2,
-                                                color=self.model._configuration[self.view_name]['class1_color_train'],
-                                                label=self.model._configuration[self.view_name]['class1_label_train'],
-                                                marker=self.model._configuration[self.view_name]['class1_marker_train'], alpha = 0.5)
+                        feature_1, feature_2 = self.model._configuration[self.view_name][distribution]['features_id'][2]
+                        class2_training_f1 = y_prob_train[::,feature_1]
+                        class2_training_f2 = y_prob_train[::,feature_2]
+                        pads[pad].scatter(class2_training_f1, class2_training_f2,
+                                        color=self.model._configuration[self.view_name][distribution]['class2_color_train'],
+                                        label=self.model._configuration[self.view_name][distribution]['class2_label_train'],
+                                        marker=self.model._configuration[self.view_name][distribution]['class2_marker_train'], alpha = 0.5)
 
-                                y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                                y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
-
-                                # class1_testing_f1 = y_prob_test[::,1] # Probability to be class 1
-                                # class1_testing_f2 = y_prob_test[::,2] # Probability to be class 2
-                                # pads[pad].scatter(class1_testing_f1, class1_testing_f2,
-                                #                 color=self.model._configuration[self.view_name]['class1_color_test'],
-                                #                 label=self.model._configuration[self.view_name]['class1_label_test'],
-                                #                 marker=self.model._configuration[self.view_name]['class1_marker_test'], alpha = 0.5)
-
-                                class2_training_f1 = y_prob_train[::,1] # Probability to be class 1
-                                class2_training_f3 = y_prob_train[::,3] # Probability to be class 3
-                                pads[pad].scatter(class2_training_f1, class2_training_f3,
-                                                color=self.model._configuration[self.view_name]['class2_color_train'],
-                                                label=self.model._configuration[self.view_name]['class2_label_train'],
-                                                marker=self.model._configuration[self.view_name]['class2_marker_train'], alpha = 0.5)
-
-                                # class2_testing_f1 = y_prob_test[::,1] # Probability to be class 1
-                                # class2_testing_f3 = y_prob_test[::,3] # Probability to be class 3
-                                # pads[pad].scatter(class2_testing_f1, class2_testing_f3,
-                                #                 color=self.model._configuration[self.view_name]['class2_color_test'],
-                                #                 label=self.model._configuration[self.view_name]['class2_label_test'],
-                                #                 marker=self.model._configuration[self.view_name]['class2_marker_test'], alpha = 0.5)
-
-                                pads[pad].set_xlabel('Class 1 probality ')
-                                pads[pad].set_ylabel('Class 0,2,3 probality ')
-                                pads[pad].legend()
-                                pass
-                        # elif distribution == 'correlation_2':
-                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
-
-                        #         class1_training_f1 = y_prob_train[::,2] # Probability to be class 2
-                        #         class1_training_f0 = y_prob_train[::,0] # Probability to be class 0
-                        #         pads[pad].scatter(class1_training_f1, class1_training_f0,
-                        #                         color=self.model._configuration[self.view_name]['class0_color_train'],
-                        #                         label=self.model._configuration[self.view_name]['class0_label_train'],
-                        #                         marker=self.model._configuration[self.view_name]['class0_marker_train'], alpha = 0.5)
-
-                        #         # class1_testing_f1 = y_prob_test[::,2] # Probability to be class 2
-                        #         # class1_testing_f0 = y_prob_test[::,0] # Probability to be class 0
-                        #         # pads[pad].scatter(class1_testing_f1, class1_testing_f0,
-                        #         #                 color=self.model._configuration[self.view_name]['class0_color_test'],
-                        #         #                 label=self.model._configuration[self.view_name]['class0_label_test'],
-                        #         #                 marker=self.model._configuration[self.view_name]['class0_marker_test'], alpha = 0.5)
-                                
-                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
-
-                        #         class1_training_f1 = y_prob_train[::,2] # Probability to be class 2
-                        #         class1_training_f2 = y_prob_train[::,1] # Probability to be class 1
-                        #         pads[pad].scatter(class1_training_f1, class1_training_f2,
-                        #                         color=self.model._configuration[self.view_name]['class1_color_train'],
-                        #                         label=self.model._configuration[self.view_name]['class1_label_train'],
-                        #                         marker=self.model._configuration[self.view_name]['class1_marker_train'], alpha = 0.5)
-
-                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
-
-                        #         # class1_testing_f1 = y_prob_test[::,2] # Probability to be class 2
-                        #         # class1_testing_f2 = y_prob_test[::,1] # Probability to be class 1
-                        #         # pads[pad].scatter(class1_testing_f1, class1_testing_f2,
-                        #         #                 color=self.model._configuration[self.view_name]['class1_color_test'],
-                        #         #                 label=self.model._configuration[self.view_name]['class1_label_test'],
-                        #         #                 marker=self.model._configuration[self.view_name]['class1_marker_test'], alpha = 0.5)
-
-                        #         class2_training_f1 = y_prob_train[::,2] # Probability to be class 2
-                        #         class2_training_f3 = y_prob_train[::,3] # Probability to be class 3
-                        #         pads[pad].scatter(class2_training_f1, class2_training_f3,
-                        #                         color=self.model._configuration[self.view_name]['class2_color_train'],
-                        #                         label=self.model._configuration[self.view_name]['class2_label_train'],
-                        #                         marker=self.model._configuration[self.view_name]['class2_marker_train'], alpha = 0.5)
-
-                        #         # class2_testing_f1 = y_prob_test[::,2] # Probability to be class 2
-                        #         # class2_testing_f3 = y_prob_test[::,3] # Probability to be class 3
-                        #         # pads[pad].scatter(class2_testing_f1, class2_testing_f3,
-                        #         #                 color=self.model._configuration[self.view_name]['class2_color_test'],
-                        #         #                 label=self.model._configuration[self.view_name]['class2_label_test'],
-                        #         #                 marker=self.model._configuration[self.view_name]['class2_marker_test'], alpha = 0.5)
-
-                        #         pads[pad].set_xlabel('Class 2 probality ')
-                        #         pads[pad].set_ylabel('Class 0,1,3 probality ')
-                        #         pads[pad].legend()
-                        #         pass
-                        # elif distribution == 'correlation_3':
-                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
-
-                        #         class1_training_f1 = y_prob_train[::,3] # Probability to be class3
-                        #         class1_training_f0 = y_prob_train[::,0] # Probability to be class 0
-                        #         pads[pad].scatter(class1_training_f1, class1_training_f0,
-                        #                         color=self.model._configuration[self.view_name]['class0_color_train'],
-                        #                         label=self.model._configuration[self.view_name]['class0_label_train'],
-                        #                         marker=self.model._configuration[self.view_name]['class0_marker_train'], alpha = 0.5)
-
-                        #         # class1_testing_f1 = y_prob_test[::,3] # Probability to be class 3
-                        #         # class1_testing_f0 = y_prob_test[::,0] # Probability to be class 0
-                        #         # pads[pad].scatter(class1_testing_f1, class1_testing_f0,
-                        #         #                 color=self.model._configuration[self.view_name]['class0_color_test'],
-                        #         #                 label=self.model._configuration[self.view_name]['class0_label_test'],
-                        #         #                 marker=self.model._configuration[self.view_name]['class0_marker_test'], alpha = 0.5)
-                                
-                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
-
-                        #         class1_training_f1 = y_prob_train[::,3] # Probability to be class 3
-                        #         class1_training_f2 = y_prob_train[::,1] # Probability to be class 1
-                        #         pads[pad].scatter(class1_training_f1, class1_training_f2,
-                        #                         color=self.model._configuration[self.view_name]['class1_color_train'],
-                        #                         label=self.model._configuration[self.view_name]['class1_label_train'],
-                        #                         marker=self.model._configuration[self.view_name]['class1_marker_train'], alpha = 0.5)
-
-                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
-
-                        #         # class1_testing_f1 = y_prob_test[::,3] # Probability to be class 3
-                        #         # class1_testing_f2 = y_prob_test[::,1] # Probability to be class 1
-                        #         # pads[pad].scatter(class1_testing_f1, class1_testing_f2,
-                        #         #                 color=self.model._configuration[self.view_name]['class1_color_test'],
-                        #         #                 label=self.model._configuration[self.view_name]['class1_label_test'],
-                        #         #                 marker=self.model._configuration[self.view_name]['class1_marker_test'], alpha = 0.5)
-
-                        #         class2_training_f1 = y_prob_train[::,3] # Probability to be class 3
-                        #         class2_training_f3 = y_prob_train[::,2] # Probability to be class 2
-                        #         pads[pad].scatter(class2_training_f1, class2_training_f3,
-                        #                         color=self.model._configuration[self.view_name]['class2_color_train'],
-                        #                         label=self.model._configuration[self.view_name]['class2_label_train'],
-                        #                         marker=self.model._configuration[self.view_name]['class2_marker_train'], alpha = 0.5)
-
-                        #         # class2_testing_f1 = y_prob_test[::,3] # Probability to be class 3
-                        #         # class2_testing_f3 = y_prob_test[::,2] # Probability to be class 2
-                        #         # pads[pad].scatter(class2_testing_f1, class2_testing_f3,
-                        #         #                 color=self.model._configuration[self.view_name]['class2_color_test'],
-                        #         #                 label=self.model._configuration[self.view_name]['class2_label_test'],
-                        #         #                 marker=self.model._configuration[self.view_name]['class2_marker_test'], alpha = 0.5)
-                        #         pads[pad].set_xlabel('Class 3 probality ')
-                        #         pads[pad].set_ylabel('Class 0,1,2 probality ')
-                        #         pads[pad].legend()
-                        #         pass
-                        else: 
-                                logging.error('Unknown distribution type: {}'.format(distribution))
-                                raise NotImplementedError
+                        pads[pad].set_xlabel(self.model._configuration[self.view_name][distribution]['xlabel'])
+                        pads[pad].set_ylabel(self.model._configuration[self.view_name][distribution]['ylabel'])
+                        pads[pad].legend()
+                        pass
+                        # else: 
+                        #         logging.error('Unknown distribution type: {}'.format(distribution))
+                        #         raise NotImplementedError
 
                 fig.tight_layout()
                 # plt.show()

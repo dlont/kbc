@@ -145,10 +145,12 @@ def main(arguments):
                             view = ViewModelRegressionLassoLarsIC(view_name)
                     elif configuration[view_name]['type'] == 'classification_model_learning_curve':
                             view = ViewModelClassificationLearningCurve(view_name)
-                    elif configuration[view_name]['type'] == 'multiclassification_model_learning_curve':
+                    elif configuration[view_name]['type'] == 'multiclassification_learning_curve':
                             view = ViewModelMulticlassClassificationLearningCurve(view_name)
-                    elif configuration[view_name]['type'] == 'multiclassification_model_classifier_distribution':
+                    elif configuration[view_name]['type'] == 'multiclassification_classifier_distribution':
                             view = ViewModelMulticlassClassificationDistributions(view_name)
+                    elif configuration[view_name]['type'] == 'multiclassification_prob_correlations':
+                            view = ViewModelMulticlassProbabilityCorrelations(view_name)
                     else: view = View(view_name)
                     view.set_model(model)
                     view.set_style(style)

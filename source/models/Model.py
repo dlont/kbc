@@ -38,13 +38,14 @@ class AdvancedModelClassification(Model):
                 self._annotation = 'Performance comparision of different MVA discriminants'
                 if 'annotation' in self._configuration:
                         self._annotation = self._configuration['annotation']
+                self.do_training = self._configuration['model'].get('do_training',False)
                 self.fit_results = None
                 self.my_model = None
                 self.Initialize()
 
         @log_with()
         def Initialize(self):
-                self.build_best_prediction()
+                if self.do_training: self.build_best_prediction()
                 pass
 
         @log_with()

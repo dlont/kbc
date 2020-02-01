@@ -14,6 +14,23 @@ class PandasDrownedClassSelector(PandasClassSelector):
     def select(self,df):
         return df[df['Survived']==0]
 
+class SaleMFClassSelector(PandasClassSelector):
+    def __init__(self,value=0): self.value = value
+    def select(self,df):
+        return df[df['Sale_MF']==self.value]
+class SaleCCClassSelector(PandasClassSelector):
+    def __init__(self,value=0): self.value = value
+    def select(self,df):
+        return df[df['Sale_CC']==self.value]
+class SaleCLClassSelector(PandasClassSelector):
+    def __init__(self,value=0): self.value = value
+    def select(self,df):
+        return df[df['Sale_CL']==self.value]
+class SaleRejectedClassSelector(PandasClassSelector):
+    def __init__(self): pass
+    def select(self,df):
+        return df[(df.Sale_MF==0) & (df.Sale_CC==0) & (df.Sale_CL==0)]
+
 class DataProvider():
     __metaclass__ = abc.ABCMeta
     @abc.abstractmethod
@@ -107,17 +124,6 @@ class PandasDataProviderRespondingClientsRevenueMF(PandasDataProviderFromCSV):
 
             self.train, self.test = train_test_split(self.data, train_size=self.training_fraction, shuffle=False)
 
-def my_f(el):
-    import numpy as np
-    result = -1
-    if el['Sale_MF']==1: result = 1
-    elif el['Sale_CC']==1: result = 2
-    elif el['Sale_CL']==1: result = 3
-    elif el['Sale_MF'] == 0 and el['Sale_CC']==0 and el['Sale_CL']==0: result = 0
-    elif el['Sale_MF'] == -1 or el['Sale_CC']==-1 or el['Sale_CL']==-1: result = -1
-    else: result = np.nan
-    return result
-
 class PandasDataProviderRespondingClientsNoOutliers(PandasDataProviderFromCSV):
         def __init__(self,filename_csv,remove_all=False):
             import pandas as pd
@@ -129,7 +135,7 @@ class PandasDataProviderRespondingClientsNoOutliers(PandasDataProviderFromCSV):
             all_data = pd.read_csv(self.filename_csv, index_col='Client')
 
             #Add multiclass enconded axis
-            all_data['Sale_Multiclass'] = all_data[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:my_f(el),axis=1)
+            all_data['Sale_Multiclass'] = all_data[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:self.ordinal_enconding(el),axis=1)
 
             self.data = all_data[all_data.Sale_Multiclass != -1]  #training data
             
@@ -139,6 +145,17 @@ class PandasDataProviderRespondingClientsNoOutliers(PandasDataProviderFromCSV):
             # transform data using pipelines
 
             self.train, self.test = train_test_split(self.data, train_size=self.training_fraction, shuffle=False)
+
+        def ordinal_enconding(self,el):
+            import numpy as np
+            result = -1
+            if el['Sale_MF']==1: result = 1
+            elif el['Sale_CC']==1: result = 2
+            elif el['Sale_CL']==1: result = 3
+            elif el['Sale_MF'] == 0 and el['Sale_CC']==0 and el['Sale_CL']==0: result = 0
+            elif el['Sale_MF'] == -1 or el['Sale_CC']==-1 or el['Sale_CL']==-1: result = -1
+            else: result = np.nan
+            return result
 
 class PandasDataProviderRespondingClientsNoOutliersRevenueMF(PandasDataProviderFromCSV):
         def __init__(self,filename_csv,remove_all=False):
