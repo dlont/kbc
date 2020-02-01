@@ -149,6 +149,7 @@ class View2dCorrelationsTrain(View):
                 fig.tight_layout()
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
 
 class View1dTrainTest(View):
         @log_with()
@@ -182,12 +183,12 @@ class View1dTrainTest(View):
                 from dataprovider import PandasSurvivedClassSelector, PandasDrownedClassSelector
                 data_provider = self.model.get_data_provider(self.model._configuration[feature_name]['data_provider'])
                 class1_selector = self.model._configuration[feature_name]['class1']
-                # class2_selector  = self.model._configuration[feature_name]['class2']
+                class2_selector  = self.model._configuration[feature_name]['class2']
         
                 class1_training = list(data_provider.get_training_examples(feature_name,class1_selector).fillna(-1))
                 class1_testing = list(data_provider.get_testing_examples(feature_name,class1_selector).fillna(-1))
-                # class2_training = list(data_provider.get_training_examples(feature_name,class2_selector).fillna(-1))
-                # class2_testing = list(data_provider.get_testing_examples(feature_name,class2_selector).fillna(-1))
+                class2_training = list(data_provider.get_training_examples(feature_name,class2_selector).fillna(-1))
+                class2_testing = list(data_provider.get_testing_examples(feature_name,class2_selector).fillna(-1))
                 
                 # Binning configuration
                 underflow, overflow = self.model._configuration[feature_name]['style']['under_over_flow']
@@ -215,26 +216,28 @@ class View1dTrainTest(View):
                                 ls=self.model._configuration[feature_name]['class1_line_test'], color=self.model._configuration[feature_name]['class1_color_test'], 
                                 label=self.model._configuration[feature_name]['class1_label_test'])
 
-                # # Class 2 training and testing distributions
-                # if any([underflow, overflow]):
-                #         ax.hist(np.clip(class2_training, bins[0] if underflow else None, bins[-1] if overflow else None), bins,
-                #         density=True, histtype='stepfilled',
-                #         color=self.model._configuration[feature_name]['class2_color_train'], 
-                #         label=self.model._configuration[feature_name]['class2_label_train'], alpha = 0.5)
-                # else:
-                #         ax.hist(class2_training, bins,
-                #         density=True, histtype='stepfilled',
-                #         color=self.model._configuration[feature_name]['class2_color_train'], 
-                #         label=self.model._configuration[feature_name]['class2_label_train'], alpha = 0.5)
+                # Class 2 training and testing distributions
+                if any([underflow, overflow]):
+                        plt.rcParams['hatch.color'] = self.model._configuration[feature_name]['class2_color_train']
+                        ax.hist(np.clip(class2_training, bins[0] if underflow else None, bins[-1] if overflow else None), bins,
+                        density=True, histtype='stepfilled',
+                        color=self.model._configuration[feature_name]['class2_color_train'], hatch='///',
+                        label=self.model._configuration[feature_name]['class2_label_train'], alpha = 0.2)
+                else:
+                        plt.rcParams['hatch.color'] = self.model._configuration[feature_name]['class2_color_train']
+                        ax.hist(class2_training, bins,
+                        density=True, histtype='stepfilled',
+                        color=self.model._configuration[feature_name]['class2_color_train'], hatch='///',
+                        label=self.model._configuration[feature_name]['class2_label_train'], alpha = 0.2)
                         
-                # hist_testing = np.histogram(class2_testing, bins)
-                # if any([underflow, overflow]):
-                #         hist_testing = np.histogram(np.clip(class2_testing, bins[0] if underflow else None, bins[-1] if overflow else None), bins)
-                # points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0]))
-                # points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/np.sum(hist_testing[0])
-                # ax.errorbar(bin_centers, points_testing_y, yerr=points_testing_yerr, marker=self.model._configuration[feature_name]['class2_marker_test'], 
-                #                 ls=self.model._configuration[feature_name]['class2_line_test'], color=self.model._configuration[feature_name]['class2_color_test'], 
-                #                 label=self.model._configuration[feature_name]['class2_label_test'])
+                hist_testing = np.histogram(class2_testing, bins)
+                if any([underflow, overflow]):
+                        hist_testing = np.histogram(np.clip(class2_testing, bins[0] if underflow else None, bins[-1] if overflow else None), bins)
+                points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0]))
+                points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/np.sum(hist_testing[0])
+                ax.errorbar(bin_centers, points_testing_y, yerr=points_testing_yerr, marker=self.model._configuration[feature_name]['class2_marker_test'], 
+                                ls=self.model._configuration[feature_name]['class2_line_test'], color=self.model._configuration[feature_name]['class2_color_test'], 
+                                label=self.model._configuration[feature_name]['class2_label_test'])
                 
                 # Plot style
                 self.style_feature_pad(ax,feature_name)
@@ -251,12 +254,12 @@ class View1dTrainTest(View):
                 from dataprovider import PandasSurvivedClassSelector, PandasDrownedClassSelector
                 data_provider = self.model.get_data_provider(self.model._configuration[feature_name]['data_provider'])
                 class1_selector = self.model._configuration[feature_name]['class1']
-                # class2_selector  = self.model._configuration[feature_name]['class2']
+                class2_selector  = self.model._configuration[feature_name]['class2']
         
                 class1_training = list(data_provider.get_training_examples(feature_name,class1_selector).fillna('-1'))
                 class1_testing = list(data_provider.get_testing_examples(feature_name,class1_selector).fillna('-1'))
-                # class2_training = list(data_provider.get_training_examples(feature_name,class2_selector).fillna('-1'))
-                # class2_testing = list(data_provider.get_testing_examples(feature_name,class2_selector).fillna('-1'))
+                class2_training = list(data_provider.get_training_examples(feature_name,class2_selector).fillna('-1'))
+                class2_testing = list(data_provider.get_testing_examples(feature_name,class2_selector).fillna('-1'))
                 
                 # Binning configuration
                 bins = self.model._configuration[feature_name]['style']['bins']
@@ -267,11 +270,11 @@ class View1dTrainTest(View):
                 # sort entries in the dictionary in a way defined by the config file
                 class1_training_values = [class1_training_dic[bin] for bin in bins]
                 
-                # class2_training_dic = {bin:0 for bin in bins}
-                # for entry in class2_training: class2_training_dic[entry]+=1
-                # for bin in bins: class2_training_dic[bin]/=float(len(class2_training))
-                # # sort entries in the dictionary in a way defined by the config file
-                # class2_training_values = [class2_training_dic[bin] for bin in bins]
+                class2_training_dic = {bin:0 for bin in bins}
+                for entry in class2_training: class2_training_dic[entry]+=1
+                for bin in bins: class2_training_dic[bin]/=float(len(class2_training))
+                # sort entries in the dictionary in a way defined by the config file
+                class2_training_values = [class2_training_dic[bin] for bin in bins]
 
                 # Class 1 training and testing distributions
                 ax.bar(bins, class1_training_values, color=self.model._configuration[feature_name]['class1_color_train'], 
@@ -292,24 +295,25 @@ class View1dTrainTest(View):
                                 color=self.model._configuration[feature_name]['class1_color_test'], 
                                 label=self.model._configuration[feature_name]['class1_label_test'])
 
-                # # Class 2 training and testing distributions
-                # ax.bar(bins, class2_training_values, color=self.model._configuration[feature_name]['class2_color_train'], 
-                # label=self.model._configuration[feature_name]['class2_label_train'], alpha = 0.5)
-                # class2_testing_dic = {bin:0 for bin in bins}
-                # class2_testing_err_dic = {bin:0 for bin in bins}
-                # for entry in class2_testing: class2_testing_dic[entry]+=1
-                # for bin in bins: class2_testing_err_dic[bin]=np.sqrt(class2_testing_dic[bin])
-                # for bin in bins: 
-                #         class2_testing_dic[bin]/=float(len(class2_testing))
-                #         class2_testing_err_dic[bin]/=float(len(class2_testing))
-                # # sort entries in the dictionary in a way defined by the config file
-                # class2_testing_values = [class2_testing_dic[bin] for bin in bins]
-                # class2_testing_values_err = [class2_testing_err_dic[bin] for bin in bins]
-                # ax.errorbar(bins, class2_testing_values, yerr=class2_testing_values_err,
-                #                 marker=self.model._configuration[feature_name]['class2_marker_test'], 
-                #                 ls=self.model._configuration[feature_name]['class2_line_test'],
-                #                 color=self.model._configuration[feature_name]['class2_color_test'], 
-                #                 label=self.model._configuration[feature_name]['class2_label_test'])
+                # Class 2 training and testing distributions
+                plt.rcParams['hatch.color'] = self.model._configuration[feature_name]['class2_color_train']
+                ax.bar(bins, class2_training_values, color=self.model._configuration[feature_name]['class2_color_train'], 
+                label=self.model._configuration[feature_name]['class2_label_train'], hatch='///', alpha = 0.5)
+                class2_testing_dic = {bin:0 for bin in bins}
+                class2_testing_err_dic = {bin:0 for bin in bins}
+                for entry in class2_testing: class2_testing_dic[entry]+=1
+                for bin in bins: class2_testing_err_dic[bin]=np.sqrt(class2_testing_dic[bin])
+                for bin in bins: 
+                        class2_testing_dic[bin]/=float(len(class2_testing))
+                        class2_testing_err_dic[bin]/=float(len(class2_testing))
+                # sort entries in the dictionary in a way defined by the config file
+                class2_testing_values = [class2_testing_dic[bin] for bin in bins]
+                class2_testing_values_err = [class2_testing_err_dic[bin] for bin in bins]
+                ax.errorbar(bins, class2_testing_values, yerr=class2_testing_values_err,
+                                marker=self.model._configuration[feature_name]['class2_marker_test'], 
+                                ls=self.model._configuration[feature_name]['class2_line_test'],
+                                color=self.model._configuration[feature_name]['class2_color_test'], 
+                                label=self.model._configuration[feature_name]['class2_label_test'])
                 
                 # Plot style
                 self.style_feature_pad(ax,feature_name)
@@ -335,6 +339,7 @@ class View1dTrainTest(View):
                 fig.tight_layout()
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
 
 class ViewModelRegressionLearningCurve(View):
         @log_with()
@@ -368,6 +373,7 @@ class ViewModelRegressionLearningCurve(View):
                 # plt.show()
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
 
 class ViewModelRegressionLassoLarsIC(View):
         @log_with()
@@ -404,6 +410,7 @@ class ViewModelRegressionLassoLarsIC(View):
                 # plt.show()
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
 
 class ViewModelMulticlassClassificationDistributions(View):
         @log_with()
@@ -464,14 +471,50 @@ class ViewModelMulticlassClassificationDistributions(View):
                                 pads[pad].legend()
                                 pads[pad].set_xlabel('Classifier output')
                                 pads[pad].set_title('REJECT=0,MF=1,CC=2,CL=3'.format(distribution))
-                        elif distribution == 'correlation_1':
+                        else: 
+                                logging.error('Unknown distribution type: {}'.format(distribution))
+                                raise NotImplementedError
+
+                fig.tight_layout()
+                # plt.show()
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
+
+class ViewModelMulticlassProbabilityCorrelations(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                pads = axes.flatten()
+
+                target_variable_names = self.model._configuration['model']['target']
+                data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
+
+                input_features_names = self.model._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+
+                for pad,distribution in enumerate(self.model._configuration[self.view_name]['distributions']):
+                        if distribution == 'correlation_1':
                                 y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
                                 y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
 
                                 class1_training_f1 = y_prob_train[::,1] # Probability to be class 1
                                 class1_training_f0 = y_prob_train[::,0] # Probability to be class 0
                                 pads[pad].scatter(class1_training_f1, class1_training_f0,
-                                                color=self.model._configuration[self.view_name]['class0_color_train'],
+                                                color=self.model._configuration[self.view_name][distribution]['class0_color_train'],
                                                 label=self.model._configuration[self.view_name]['class0_label_train'],
                                                 marker=self.model._configuration[self.view_name]['class0_marker_train'], alpha = 0.5)
 
@@ -520,117 +563,117 @@ class ViewModelMulticlassClassificationDistributions(View):
                                 pads[pad].set_ylabel('Class 0,2,3 probality ')
                                 pads[pad].legend()
                                 pass
-                        elif distribution == 'correlation_2':
-                                y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                                y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
+                        # elif distribution == 'correlation_2':
+                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
+                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
 
-                                class1_training_f1 = y_prob_train[::,2] # Probability to be class 2
-                                class1_training_f0 = y_prob_train[::,0] # Probability to be class 0
-                                pads[pad].scatter(class1_training_f1, class1_training_f0,
-                                                color=self.model._configuration[self.view_name]['class0_color_train'],
-                                                label=self.model._configuration[self.view_name]['class0_label_train'],
-                                                marker=self.model._configuration[self.view_name]['class0_marker_train'], alpha = 0.5)
+                        #         class1_training_f1 = y_prob_train[::,2] # Probability to be class 2
+                        #         class1_training_f0 = y_prob_train[::,0] # Probability to be class 0
+                        #         pads[pad].scatter(class1_training_f1, class1_training_f0,
+                        #                         color=self.model._configuration[self.view_name]['class0_color_train'],
+                        #                         label=self.model._configuration[self.view_name]['class0_label_train'],
+                        #                         marker=self.model._configuration[self.view_name]['class0_marker_train'], alpha = 0.5)
 
-                                # class1_testing_f1 = y_prob_test[::,2] # Probability to be class 2
-                                # class1_testing_f0 = y_prob_test[::,0] # Probability to be class 0
-                                # pads[pad].scatter(class1_testing_f1, class1_testing_f0,
-                                #                 color=self.model._configuration[self.view_name]['class0_color_test'],
-                                #                 label=self.model._configuration[self.view_name]['class0_label_test'],
-                                #                 marker=self.model._configuration[self.view_name]['class0_marker_test'], alpha = 0.5)
+                        #         # class1_testing_f1 = y_prob_test[::,2] # Probability to be class 2
+                        #         # class1_testing_f0 = y_prob_test[::,0] # Probability to be class 0
+                        #         # pads[pad].scatter(class1_testing_f1, class1_testing_f0,
+                        #         #                 color=self.model._configuration[self.view_name]['class0_color_test'],
+                        #         #                 label=self.model._configuration[self.view_name]['class0_label_test'],
+                        #         #                 marker=self.model._configuration[self.view_name]['class0_marker_test'], alpha = 0.5)
                                 
-                                y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                                y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
+                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
+                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
 
-                                class1_training_f1 = y_prob_train[::,2] # Probability to be class 2
-                                class1_training_f2 = y_prob_train[::,1] # Probability to be class 1
-                                pads[pad].scatter(class1_training_f1, class1_training_f2,
-                                                color=self.model._configuration[self.view_name]['class1_color_train'],
-                                                label=self.model._configuration[self.view_name]['class1_label_train'],
-                                                marker=self.model._configuration[self.view_name]['class1_marker_train'], alpha = 0.5)
+                        #         class1_training_f1 = y_prob_train[::,2] # Probability to be class 2
+                        #         class1_training_f2 = y_prob_train[::,1] # Probability to be class 1
+                        #         pads[pad].scatter(class1_training_f1, class1_training_f2,
+                        #                         color=self.model._configuration[self.view_name]['class1_color_train'],
+                        #                         label=self.model._configuration[self.view_name]['class1_label_train'],
+                        #                         marker=self.model._configuration[self.view_name]['class1_marker_train'], alpha = 0.5)
 
-                                y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                                y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
+                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
+                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
 
-                                # class1_testing_f1 = y_prob_test[::,2] # Probability to be class 2
-                                # class1_testing_f2 = y_prob_test[::,1] # Probability to be class 1
-                                # pads[pad].scatter(class1_testing_f1, class1_testing_f2,
-                                #                 color=self.model._configuration[self.view_name]['class1_color_test'],
-                                #                 label=self.model._configuration[self.view_name]['class1_label_test'],
-                                #                 marker=self.model._configuration[self.view_name]['class1_marker_test'], alpha = 0.5)
+                        #         # class1_testing_f1 = y_prob_test[::,2] # Probability to be class 2
+                        #         # class1_testing_f2 = y_prob_test[::,1] # Probability to be class 1
+                        #         # pads[pad].scatter(class1_testing_f1, class1_testing_f2,
+                        #         #                 color=self.model._configuration[self.view_name]['class1_color_test'],
+                        #         #                 label=self.model._configuration[self.view_name]['class1_label_test'],
+                        #         #                 marker=self.model._configuration[self.view_name]['class1_marker_test'], alpha = 0.5)
 
-                                class2_training_f1 = y_prob_train[::,2] # Probability to be class 2
-                                class2_training_f3 = y_prob_train[::,3] # Probability to be class 3
-                                pads[pad].scatter(class2_training_f1, class2_training_f3,
-                                                color=self.model._configuration[self.view_name]['class2_color_train'],
-                                                label=self.model._configuration[self.view_name]['class2_label_train'],
-                                                marker=self.model._configuration[self.view_name]['class2_marker_train'], alpha = 0.5)
+                        #         class2_training_f1 = y_prob_train[::,2] # Probability to be class 2
+                        #         class2_training_f3 = y_prob_train[::,3] # Probability to be class 3
+                        #         pads[pad].scatter(class2_training_f1, class2_training_f3,
+                        #                         color=self.model._configuration[self.view_name]['class2_color_train'],
+                        #                         label=self.model._configuration[self.view_name]['class2_label_train'],
+                        #                         marker=self.model._configuration[self.view_name]['class2_marker_train'], alpha = 0.5)
 
-                                # class2_testing_f1 = y_prob_test[::,2] # Probability to be class 2
-                                # class2_testing_f3 = y_prob_test[::,3] # Probability to be class 3
-                                # pads[pad].scatter(class2_testing_f1, class2_testing_f3,
-                                #                 color=self.model._configuration[self.view_name]['class2_color_test'],
-                                #                 label=self.model._configuration[self.view_name]['class2_label_test'],
-                                #                 marker=self.model._configuration[self.view_name]['class2_marker_test'], alpha = 0.5)
+                        #         # class2_testing_f1 = y_prob_test[::,2] # Probability to be class 2
+                        #         # class2_testing_f3 = y_prob_test[::,3] # Probability to be class 3
+                        #         # pads[pad].scatter(class2_testing_f1, class2_testing_f3,
+                        #         #                 color=self.model._configuration[self.view_name]['class2_color_test'],
+                        #         #                 label=self.model._configuration[self.view_name]['class2_label_test'],
+                        #         #                 marker=self.model._configuration[self.view_name]['class2_marker_test'], alpha = 0.5)
 
-                                pads[pad].set_xlabel('Class 2 probality ')
-                                pads[pad].set_ylabel('Class 0,1,3 probality ')
-                                pads[pad].legend()
-                                pass
-                        elif distribution == 'correlation_3':
-                                y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                                y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
+                        #         pads[pad].set_xlabel('Class 2 probality ')
+                        #         pads[pad].set_ylabel('Class 0,1,3 probality ')
+                        #         pads[pad].legend()
+                        #         pass
+                        # elif distribution == 'correlation_3':
+                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
+                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
 
-                                class1_training_f1 = y_prob_train[::,3] # Probability to be class3
-                                class1_training_f0 = y_prob_train[::,0] # Probability to be class 0
-                                pads[pad].scatter(class1_training_f1, class1_training_f0,
-                                                color=self.model._configuration[self.view_name]['class0_color_train'],
-                                                label=self.model._configuration[self.view_name]['class0_label_train'],
-                                                marker=self.model._configuration[self.view_name]['class0_marker_train'], alpha = 0.5)
+                        #         class1_training_f1 = y_prob_train[::,3] # Probability to be class3
+                        #         class1_training_f0 = y_prob_train[::,0] # Probability to be class 0
+                        #         pads[pad].scatter(class1_training_f1, class1_training_f0,
+                        #                         color=self.model._configuration[self.view_name]['class0_color_train'],
+                        #                         label=self.model._configuration[self.view_name]['class0_label_train'],
+                        #                         marker=self.model._configuration[self.view_name]['class0_marker_train'], alpha = 0.5)
 
-                                # class1_testing_f1 = y_prob_test[::,3] # Probability to be class 3
-                                # class1_testing_f0 = y_prob_test[::,0] # Probability to be class 0
-                                # pads[pad].scatter(class1_testing_f1, class1_testing_f0,
-                                #                 color=self.model._configuration[self.view_name]['class0_color_test'],
-                                #                 label=self.model._configuration[self.view_name]['class0_label_test'],
-                                #                 marker=self.model._configuration[self.view_name]['class0_marker_test'], alpha = 0.5)
+                        #         # class1_testing_f1 = y_prob_test[::,3] # Probability to be class 3
+                        #         # class1_testing_f0 = y_prob_test[::,0] # Probability to be class 0
+                        #         # pads[pad].scatter(class1_testing_f1, class1_testing_f0,
+                        #         #                 color=self.model._configuration[self.view_name]['class0_color_test'],
+                        #         #                 label=self.model._configuration[self.view_name]['class0_label_test'],
+                        #         #                 marker=self.model._configuration[self.view_name]['class0_marker_test'], alpha = 0.5)
                                 
-                                y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                                y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
+                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
+                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
 
-                                class1_training_f1 = y_prob_train[::,3] # Probability to be class 3
-                                class1_training_f2 = y_prob_train[::,1] # Probability to be class 1
-                                pads[pad].scatter(class1_training_f1, class1_training_f2,
-                                                color=self.model._configuration[self.view_name]['class1_color_train'],
-                                                label=self.model._configuration[self.view_name]['class1_label_train'],
-                                                marker=self.model._configuration[self.view_name]['class1_marker_train'], alpha = 0.5)
+                        #         class1_training_f1 = y_prob_train[::,3] # Probability to be class 3
+                        #         class1_training_f2 = y_prob_train[::,1] # Probability to be class 1
+                        #         pads[pad].scatter(class1_training_f1, class1_training_f2,
+                        #                         color=self.model._configuration[self.view_name]['class1_color_train'],
+                        #                         label=self.model._configuration[self.view_name]['class1_label_train'],
+                        #                         marker=self.model._configuration[self.view_name]['class1_marker_train'], alpha = 0.5)
 
-                                y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                                y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
+                        #         y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
+                        #         y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
 
-                                # class1_testing_f1 = y_prob_test[::,3] # Probability to be class 3
-                                # class1_testing_f2 = y_prob_test[::,1] # Probability to be class 1
-                                # pads[pad].scatter(class1_testing_f1, class1_testing_f2,
-                                #                 color=self.model._configuration[self.view_name]['class1_color_test'],
-                                #                 label=self.model._configuration[self.view_name]['class1_label_test'],
-                                #                 marker=self.model._configuration[self.view_name]['class1_marker_test'], alpha = 0.5)
+                        #         # class1_testing_f1 = y_prob_test[::,3] # Probability to be class 3
+                        #         # class1_testing_f2 = y_prob_test[::,1] # Probability to be class 1
+                        #         # pads[pad].scatter(class1_testing_f1, class1_testing_f2,
+                        #         #                 color=self.model._configuration[self.view_name]['class1_color_test'],
+                        #         #                 label=self.model._configuration[self.view_name]['class1_label_test'],
+                        #         #                 marker=self.model._configuration[self.view_name]['class1_marker_test'], alpha = 0.5)
 
-                                class2_training_f1 = y_prob_train[::,3] # Probability to be class 3
-                                class2_training_f3 = y_prob_train[::,2] # Probability to be class 2
-                                pads[pad].scatter(class2_training_f1, class2_training_f3,
-                                                color=self.model._configuration[self.view_name]['class2_color_train'],
-                                                label=self.model._configuration[self.view_name]['class2_label_train'],
-                                                marker=self.model._configuration[self.view_name]['class2_marker_train'], alpha = 0.5)
+                        #         class2_training_f1 = y_prob_train[::,3] # Probability to be class 3
+                        #         class2_training_f3 = y_prob_train[::,2] # Probability to be class 2
+                        #         pads[pad].scatter(class2_training_f1, class2_training_f3,
+                        #                         color=self.model._configuration[self.view_name]['class2_color_train'],
+                        #                         label=self.model._configuration[self.view_name]['class2_label_train'],
+                        #                         marker=self.model._configuration[self.view_name]['class2_marker_train'], alpha = 0.5)
 
-                                # class2_testing_f1 = y_prob_test[::,3] # Probability to be class 3
-                                # class2_testing_f3 = y_prob_test[::,2] # Probability to be class 2
-                                # pads[pad].scatter(class2_testing_f1, class2_testing_f3,
-                                #                 color=self.model._configuration[self.view_name]['class2_color_test'],
-                                #                 label=self.model._configuration[self.view_name]['class2_label_test'],
-                                #                 marker=self.model._configuration[self.view_name]['class2_marker_test'], alpha = 0.5)
-                                pads[pad].set_xlabel('Class 3 probality ')
-                                pads[pad].set_ylabel('Class 0,1,2 probality ')
-                                pads[pad].legend()
-                                pass
+                        #         # class2_testing_f1 = y_prob_test[::,3] # Probability to be class 3
+                        #         # class2_testing_f3 = y_prob_test[::,2] # Probability to be class 2
+                        #         # pads[pad].scatter(class2_testing_f1, class2_testing_f3,
+                        #         #                 color=self.model._configuration[self.view_name]['class2_color_test'],
+                        #         #                 label=self.model._configuration[self.view_name]['class2_label_test'],
+                        #         #                 marker=self.model._configuration[self.view_name]['class2_marker_test'], alpha = 0.5)
+                        #         pads[pad].set_xlabel('Class 3 probality ')
+                        #         pads[pad].set_ylabel('Class 0,1,2 probality ')
+                        #         pads[pad].legend()
+                        #         pass
                         else: 
                                 logging.error('Unknown distribution type: {}'.format(distribution))
                                 raise NotImplementedError
@@ -639,6 +682,7 @@ class ViewModelMulticlassClassificationDistributions(View):
                 # plt.show()
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
 
 class ViewModelClassificationLearningCurve(View):
         @log_with()
@@ -672,6 +716,7 @@ class ViewModelClassificationLearningCurve(View):
                 # plt.show()
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
 
 class ViewModelMulticlassClassificationLearningCurve(View):
         @log_with()
@@ -705,6 +750,7 @@ class ViewModelMulticlassClassificationLearningCurve(View):
                 # plt.show()
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
 
 class LatexBeamerView(View):
         @log_with()
