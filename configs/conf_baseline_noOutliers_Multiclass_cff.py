@@ -14,7 +14,6 @@ config={
    'max_depth':5,
    'learning_rate':0.01,
    'objective':'multi:softprob',
-   'num_class':3
   },
   'mode': 'report',
   'views':['learning_curve','output_classifier','prob_correlations','confusion_matrix'],
