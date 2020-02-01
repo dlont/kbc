@@ -11,7 +11,7 @@
             "envFile": "${workspaceFolder}/.vscode/python.env",
             "request": "launch",
             "program": "${workspaceFolder}/source/kbc_direct_marketing_mock.py",
-            "args" : ["-b", "-c", "configs/conf_baseline_Sale_MF_cff.py", "--dir=results"],
+            "args" : ["-b", "-c", "configs/conf_baseline_noOutliers_Multiclass_RF_cff.py", "--dir=results"],
             "console": "integratedTerminal"
         }
     ]

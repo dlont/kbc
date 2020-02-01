@@ -57,17 +57,29 @@ class View(object):
                         logging.error("Annotation format not recognized: {}".format(type))
 
         @log_with()
-        def save_config(self, config):
-                if os.path.exists(self._outputfolder):
-                        # Writing configuration data
-                        if "_cff.py" in config: 
-				with open(self._outputfolder+'/'+os.path.basename(config), 'w') as f:
-                                        serialized_config_str = pp.pformat(self.model._configuration)
-                                        serialized_config_str = 'config='+serialized_config_str
-                                        f.write(serialized_config_str)
-                        elif ".json" in config: 
-                                with open(self._outputfolder+'/'+os.path.basename(config), 'w') as f:
-                                        json.dump(self.model._configuration, f, indent=4, sort_keys=True)
+        def save_config(self, config, outputfolder=None):
+                if outputfolder is None:
+                        if os.path.exists(self._outputfolder):
+                                # Writing configuration data
+                                if "_cff.py" in config: 
+                                        with open(self._outputfolder+'/'+os.path.basename(config), 'w') as f:
+                                                serialized_config_str = pp.pformat(self.model._configuration)
+                                                serialized_config_str = 'config='+serialized_config_str
+                                                f.write(serialized_config_str)
+                                elif ".json" in config: 
+                                        with open(self._outputfolder+'/'+os.path.basename(config), 'w') as f:
+                                                json.dump(self.model._configuration, f, indent=4, sort_keys=True)
+                else:
+                        if os.path.exists(outputfolder):
+                                # Writing configuration data
+                                if "_cff.py" in config: 
+                                        with open(outputfolder+'/'+os.path.basename(config), 'w') as f:
+                                                serialized_config_str = pp.pformat(self.model._configuration)
+                                                serialized_config_str = 'config='+serialized_config_str
+                                                f.write(serialized_config_str)
+                                elif ".json" in config: 
+                                        with open(outputfolder+'/'+os.path.basename(config), 'w') as f:
+                                                json.dump(self.model._configuration, f, indent=4, sort_keys=True)
 
         @log_with()
         def save(self,serializer):
@@ -172,6 +184,83 @@ class View1dTrainTest(View):
                 ax.set_title(self.model._configuration[feature_name]['title'])
 
         @log_with()      
+        def build_test_train_numerical_zoom_feature_pad(self, ax, feature_name):
+                '''
+                Plot training and testing distributions of a feature
+                ax: matplotlib axes instance
+                feature_name: name of the feature distribution to plot
+                '''
+                logging.debug('Plotting feature: {0}'.format(feature_name))
+
+                from dataprovider import PandasSurvivedClassSelector, PandasDrownedClassSelector
+                data_provider = self.model.get_data_provider(self.model._configuration[feature_name]['data_provider'])
+                class1_selector = self.model._configuration[feature_name]['class1']
+                class2_selector  = self.model._configuration[feature_name]['class2']
+        
+                class1_training = np.array(data_provider.get_training_examples(feature_name,class1_selector).fillna(-1))
+                class1_testing = np.array(data_provider.get_testing_examples(feature_name,class1_selector).fillna(-1))
+                class2_training = np.array(data_provider.get_training_examples(feature_name,class2_selector).fillna(-1))
+                class2_testing = np.array(data_provider.get_testing_examples(feature_name,class2_selector).fillna(-1))
+
+                EPS = 0.0001
+                class1_training = np.log10(class1_training+EPS)
+                class1_testing = np.log10(class1_testing+EPS)
+                class2_training = np.log10(class2_training+EPS)
+                class2_testing = np.log10(class2_testing+EPS)
+                
+                # Binning configuration
+                underflow, overflow = self.model._configuration[feature_name]['style']['under_over_flow']
+                bins = self.model._configuration[feature_name]['style']['bins']
+                bin_centers = bins[0:-1]+np.diff(bins)/2.
+                logging.debug('bin_centers ({0})={{1}}'.format(feature_name,bin_centers))
+
+                # Class 1 training and testing distributions
+                if any([underflow, overflow]):
+                        ax.hist(np.clip(class1_training, bins[0] if underflow else None, bins[-1] if overflow else None), bins,
+                        density=True, histtype='stepfilled',
+                        color=self.model._configuration[feature_name]['class1_color_train'], 
+                        label=self.model._configuration[feature_name]['class1_label_train'], alpha = 0.5)
+                else:
+                        ax.hist(class1_training, bins, 
+                        density=True, histtype='stepfilled', 
+                        color=self.model._configuration[feature_name]['class1_color_train'], 
+                        label=self.model._configuration[feature_name]['class1_label_train'], alpha = 0.5)
+                hist_testing = np.histogram(class1_testing, bins)
+                if any([underflow, overflow]):
+                        hist_testing = np.histogram(np.clip(class1_testing, bins[0] if underflow else None, bins[-1] if overflow else None), bins)
+                points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0]))
+                points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/float(np.sum(hist_testing[0]))
+                ax.errorbar(bin_centers, points_testing_y, yerr=points_testing_yerr, marker=self.model._configuration[feature_name]['class1_marker_test'], 
+                                ls=self.model._configuration[feature_name]['class1_line_test'], color=self.model._configuration[feature_name]['class1_color_test'], 
+                                label=self.model._configuration[feature_name]['class1_label_test'])
+
+                # Class 2 training and testing distributions
+                if any([underflow, overflow]):
+                        plt.rcParams['hatch.color'] = self.model._configuration[feature_name]['class2_color_train']
+                        ax.hist(np.clip(class2_training, bins[0] if underflow else None, bins[-1] if overflow else None), bins,
+                        density=True, histtype='stepfilled',
+                        color=self.model._configuration[feature_name]['class2_color_train'], hatch='///',
+                        label=self.model._configuration[feature_name]['class2_label_train'], alpha = 0.2)
+                else:
+                        plt.rcParams['hatch.color'] = self.model._configuration[feature_name]['class2_color_train']
+                        ax.hist(class2_training, bins,
+                        density=True, histtype='stepfilled',
+                        color=self.model._configuration[feature_name]['class2_color_train'], hatch='///',
+                        label=self.model._configuration[feature_name]['class2_label_train'], alpha = 0.2)
+                        
+                hist_testing = np.histogram(class2_testing, bins)
+                if any([underflow, overflow]):
+                        hist_testing = np.histogram(np.clip(class2_testing, bins[0] if underflow else None, bins[-1] if overflow else None), bins)
+                points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0]))
+                points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/np.sum(hist_testing[0])
+                ax.errorbar(bin_centers, points_testing_y, yerr=points_testing_yerr, marker=self.model._configuration[feature_name]['class2_marker_test'], 
+                                ls=self.model._configuration[feature_name]['class2_line_test'], color=self.model._configuration[feature_name]['class2_color_test'], 
+                                label=self.model._configuration[feature_name]['class2_label_test'])
+                
+                # Plot style
+                self.style_feature_pad(ax,feature_name)
+
+        @log_with()
         def build_test_train_numerical_feature_pad(self, ax, feature_name):
                 '''
                 Plot training and testing distributions of a feature
@@ -330,6 +419,8 @@ class View1dTrainTest(View):
                 for pad,feature in enumerate(self.model._configuration[self.view_name]['features']):
                         if self.model._configuration[feature]['style']['type'] == 'numerical':
                                 self.build_test_train_numerical_feature_pad(pads[pad],feature)
+                        elif self.model._configuration[feature]['style']['type'] == 'numerical_log_zoom':
+                                self.build_test_train_numerical_zoom_feature_pad(pads[pad],feature)
                         elif self.model._configuration[feature]['style']['type'] == 'categorical':
                                 self.build_test_train_categorical_feature_pad(pads[pad],feature)
                         else: 
@@ -543,6 +634,93 @@ class ViewModelMulticlassProbabilityCorrelations(View):
                         #         raise NotImplementedError
 
                 fig.tight_layout()
+                # plt.show()
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
+
+class ViewModelROC(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+
+                from sklearn.metrics import roc_curve, auc
+                from sklearn.preprocessing import label_binarize
+                from scipy import interp
+
+                # Compute ROC curve and ROC area for each class
+                fpr = dict()
+                tpr = dict()
+                roc_auc = dict()
+
+                target_variable_names = self.model._configuration['model']['target']
+                data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
+                input_features_names = self.model._configuration['model']['input_features']
+
+                y       = data_provider.data[target_variable_names]
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+                y_score= self.model.fit_results.decision_function(X_test)
+
+                # Binarize the output
+                y = label_binarize(y, classes=[0, 1, 2, 3])
+                n_classes = y.shape[1]
+
+                for i in range(n_classes):
+                        fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+                        roc_auc[i] = auc(fpr[i], tpr[i])
+
+                # Compute micro-average ROC curve and ROC area
+                fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
+                roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+                # First aggregate all false positive rates
+                all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+
+                # Then interpolate all ROC curves at this points
+                mean_tpr = np.zeros_like(all_fpr)
+                for i in range(n_classes):
+                        mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+
+                # Finally average it and compute AUC
+                mean_tpr /= n_classes
+
+                fpr["macro"] = all_fpr
+                tpr["macro"] = mean_tpr
+                roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+
+                # Plot all ROC curves
+                plt.figure()
+                plt.plot(fpr["micro"], tpr["micro"],
+                        label='micro-average ROC curve (area = {0:0.2f})'
+                        ''.format(roc_auc["micro"]),
+                        color='deeppink', linestyle=':', linewidth=4)
+
+                plt.plot(fpr["macro"], tpr["macro"],
+                        label='macro-average ROC curve (area = {0:0.2f})'
+                        ''.format(roc_auc["macro"]),
+                        color='navy', linestyle=':', linewidth=4)
+
+                colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
+                for i, color in zip(range(n_classes), colors):
+                        plt.plot(fpr[i], tpr[i], color=color, lw=lw,
+                        label='ROC curve of class {0} (area = {1:0.2f})'
+                        ''.format(i, roc_auc[i]))
+
+                plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+                plt.xlim([0.0, 1.0])
+                plt.ylim([0.0, 1.05])
+                plt.xlabel('False Positive Rate')
+                plt.ylabel('True Positive Rate')
+                plt.title('Some extension of Receiver operating characteristic to multi-class')
+                plt.legend(loc="lower right")
                 # plt.show()
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)

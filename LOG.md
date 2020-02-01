@@ -280,9 +280,25 @@ def my_f(el):
      elif el['Sale_MF'] == -1 or el['Sale_CC']==-1 or el['Sale_CL']==-1: result = -1
      else: result = np.nan
      return result
+
 df['Sale_multiclass'] = df[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:my_f(el),axis=1)
 df['Sale_multiclass'].head()
+df['Sale_multiclass'].value_counts()
 ```
+
+# 01.02.2020 12.50
+## Dataset class imbalance
+
+The relative occurrence of 'Reject' class is approximately twice higher than for the other classes. Perhaps this is the reason for overtraining.
+```python
+df['Sale_multiclass'].value_counts()
+-1    635
+ 0    387
+ 1    193
+ 2    192
+ 3    177
+```
+
 ----------------------------
 ----------------------------
 # Miscellaneous 

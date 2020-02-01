@@ -3,6 +3,8 @@ import numpy as np
 
 from logwith import *
 
+from dataprovider import *
+
 class Model(object):
         def __init__(self,configuration):
                 self._configuration = configuration
@@ -30,6 +32,279 @@ class Model(object):
         @log_with()
         def predict_kaggle_output(ml_model):
                 pass
+
+class AdvancedModelClassificationRF(Model):
+        def __init__(self,configuration):
+                self._configuration = configuration
+                self._objects = {}
+                self._annotation = 'Performance comparision of different MVA discriminants'
+                if 'annotation' in self._configuration:
+                        self._annotation = self._configuration['annotation']
+                self.do_training = self._configuration['model'].get('do_training',False)
+                self.fit_results = None
+                self.my_model = None
+                self.Initialize()
+
+        @log_with()
+        def Initialize(self):
+                if self.do_training: self.build_best_prediction()
+                pass
+
+        @log_with()
+        def get(self,name):
+                """
+                Factory method
+                """
+                if name in self._objects:
+                        return self._objects[name]
+                else:
+                        return None #provide factory method implementation here
+                return self._objects[name]
+
+        @log_with()
+        def get_data_provider(self,provider_name):
+                """
+                Factory method for data providers
+                """
+                if provider_name in self._objects:
+                        return self._objects[provider_name]
+                else:
+                        if '.csv' in self._configuration[provider_name]['input_file']:
+                                if self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClients': 
+                                        raise NotImplementedError
+                                elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliers': 
+                                        provider = PandasDataProviderRespondingClientsNoOutliers(self._configuration[provider_name]['input_file'],
+                                        self._configuration[provider_name]['remove_all'])
+                                else: raise NotImplementedError
+                                self._objects[provider_name] = provider
+                        else: raise NotImplementedError
+                return self._objects[provider_name]
+  
+        @log_with()
+        def build_best_prediction(self):
+                print "Building advanced multiclass RF model with outliers removed!"
+                from sklearn.ensemble import RandomForestClassifier
+                from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
+                
+                target_variable_names = self._configuration['model']['target']
+                data_provider = self.get_data_provider(self._configuration['model']['data_provider'])
+
+                input_features_names = self._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = np.ravel(data_provider.train[target_variable_names])
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+
+                # print X_train.dtypes
+                # print X_train.head()
+                # print X_test.dtypes
+                # print X_test.head()
+
+                # print y_train.dtypes
+                # print y_train.head()
+                # print y_test.dtypes
+                # print y_test.head()
+
+                # eval_set = [(X_train, y_train), (X_test, y_test)]
+
+                self.my_model = RandomForestClassifier(n_estimators=self._configuration['model']['n_estimators'],
+                                                       max_depth=self._configuration['model']['max_depth'],
+                                                       criterion=self._configuration['model']['criterion'],
+                                                       class_weight=self._configuration['model']['class_weight'])
+                self.my_model.fit(X_train, y_train)
+
+                from sklearn.inspection import permutation_importance
+                result = permutation_importance(clf, X_train, y_train, n_repeats=10,random_state=42)
+                perm_sorted_idx = result.importances_mean.argsort()
+                print perm_sorted_idx
+
+                # y_pred = self.my_model.predict(X_test)
+                # print "Max error: ", max_error(y_test,y_pred)
+                # print "Explained variance score: ", explained_variance_score(y_test,y_pred)
+                # print "Mean absolute error: ", mean_absolute_error(y_test,y_pred)
+                # print "Mean squared error: ", mean_squared_error(y_test,y_pred)
+
+                # self.fit_results = self.my_model.evals_result()
+
+                pass
+
+class AdvancedModelClassificationMLP(Model):
+        def __init__(self,configuration):
+                self._configuration = configuration
+                self._objects = {}
+                self._annotation = 'Performance comparision of different MVA discriminants'
+                if 'annotation' in self._configuration:
+                        self._annotation = self._configuration['annotation']
+                self.do_training = self._configuration['model'].get('do_training',False)
+                self.fit_results = None
+                self.my_model = None
+                self.Initialize()
+
+        @log_with()
+        def Initialize(self):
+                if self.do_training: self.build_best_prediction()
+                pass
+
+        @log_with()
+        def get(self,name):
+                """
+                Factory method
+                """
+                if name in self._objects:
+                        return self._objects[name]
+                else:
+                        return None #provide factory method implementation here
+                return self._objects[name]
+
+        @log_with()
+        def get_data_provider(self,provider_name):
+                """
+                Factory method for data providers
+                """
+                if provider_name in self._objects:
+                        return self._objects[provider_name]
+                else:
+                        if '.csv' in self._configuration[provider_name]['input_file']:
+                                if self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClients': 
+                                        raise NotImplementedError
+                                elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliers': 
+                                        provider = PandasDataProviderRespondingClientsNoOutliers(self._configuration[provider_name]['input_file'],
+                                        self._configuration[provider_name]['remove_all'])
+                                else: raise NotImplementedError
+                                self._objects[provider_name] = provider
+                        else: raise NotImplementedError
+                return self._objects[provider_name]
+  
+        @log_with()
+        def build_best_prediction(self):
+                print "Building advanced multiclass MLP model with outliers removed!"
+                from sklearn.neural_network import MLPClassifier
+                from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
+                
+                target_variable_names = self._configuration['model']['target']
+                data_provider = self.get_data_provider(self._configuration['model']['data_provider'])
+
+                input_features_names = self._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+
+                # print X_train.dtypes
+                # print X_train.head()
+                # print X_test.dtypes
+                # print X_test.head()
+
+                # print y_train.dtypes
+                # print y_train.head()
+                # print y_test.dtypes
+                # print y_test.head()
+
+                # eval_set = [(X_train, y_train), (X_test, y_test)]
+
+                self.my_model = MLPClassifier(alpha=self._configuration['model']['alpha'], max_iter=self._configuration['model']['max_iter'])
+                self.my_model.fit(X_train, y_train)
+
+                # y_pred = self.my_model.predict(X_test)
+                # print "Max error: ", max_error(y_test,y_pred)
+                # print "Explained variance score: ", explained_variance_score(y_test,y_pred)
+                # print "Mean absolute error: ", mean_absolute_error(y_test,y_pred)
+                # print "Mean squared error: ", mean_squared_error(y_test,y_pred)
+
+                # self.fit_results = self.my_model.evals_result()
+
+                pass
+
+class AdvancedModelClassificationSVC(Model):
+        def __init__(self,configuration):
+                self._configuration = configuration
+                self._objects = {}
+                self._annotation = 'Performance comparision of different MVA discriminants'
+                if 'annotation' in self._configuration:
+                        self._annotation = self._configuration['annotation']
+                self.do_training = self._configuration['model'].get('do_training',False)
+                self.fit_results = None
+                self.my_model = None
+                self.Initialize()
+
+        @log_with()
+        def Initialize(self):
+                if self.do_training: self.build_best_prediction()
+                pass
+
+        @log_with()
+        def get(self,name):
+                """
+                Factory method
+                """
+                if name in self._objects:
+                        return self._objects[name]
+                else:
+                        return None #provide factory method implementation here
+                return self._objects[name]
+
+        @log_with()
+        def get_data_provider(self,provider_name):
+                """
+                Factory method for data providers
+                """
+                if provider_name in self._objects:
+                        return self._objects[provider_name]
+                else:
+                        if '.csv' in self._configuration[provider_name]['input_file']:
+                                if self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClients': 
+                                        raise NotImplementedError
+                                elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliers': 
+                                        provider = PandasDataProviderRespondingClientsNoOutliers(self._configuration[provider_name]['input_file'],
+                                        self._configuration[provider_name]['remove_all'])
+                                else: raise NotImplementedError
+                                self._objects[provider_name] = provider
+                        else: raise NotImplementedError
+                return self._objects[provider_name]
+  
+        @log_with()
+        def build_best_prediction(self):
+                print "Building advanced multiclass SVC model with outliers removed!"
+                from sklearn import svm
+                from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
+                
+                target_variable_names = self._configuration['model']['target']
+                data_provider = self.get_data_provider(self._configuration['model']['data_provider'])
+
+                input_features_names = self._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+
+                # print X_train.dtypes
+                # print X_train.head()
+                # print X_test.dtypes
+                # print X_test.head()
+
+                # print y_train.dtypes
+                # print y_train.head()
+                # print y_test.dtypes
+                # print y_test.head()
+
+                # eval_set = [(X_train, y_train), (X_test, y_test)]
+
+                self.my_model = svm.SVC(kernel=self._configuration['model']['kernel'], C=self._configuration['model']['C'],verbose=True)
+                self.my_model.fit(X_train, y_train)
+
+                # y_pred = self.my_model.predict(X_test)
+                # print "Max error: ", max_error(y_test,y_pred)
+                # print "Explained variance score: ", explained_variance_score(y_test,y_pred)
+                # print "Mean absolute error: ", mean_absolute_error(y_test,y_pred)
+                # print "Mean squared error: ", mean_squared_error(y_test,y_pred)
+
+                self.fit_results = self.my_model.evals_result()
+
+                pass
+
 
 class AdvancedModelClassification(Model):
         def __init__(self,configuration):
@@ -64,7 +339,6 @@ class AdvancedModelClassification(Model):
                 """
                 Factory method for data providers
                 """
-                from dataprovider import *
                 if provider_name in self._objects:
                         return self._objects[provider_name]
                 else:
@@ -83,7 +357,6 @@ class AdvancedModelClassification(Model):
         def build_best_prediction(self):
                 print "Building advanced multiclass XGBoost model with outliers removed!"
                 from xgboost import XGBClassifier
-                # from sklearn.metrics import explained_variance_score, max_error, mean_absolute_error, mean_squared_error
                 from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
                 
                 target_variable_names = self._configuration['model']['target']
@@ -180,7 +453,6 @@ class AdvancedModelRegression(Model):
                 """
                 Factory method for data providers
                 """
-                from dataprovider import *
                 if provider_name in self._objects:
                         return self._objects[provider_name]
                 else:

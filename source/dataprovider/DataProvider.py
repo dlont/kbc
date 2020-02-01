@@ -141,6 +141,11 @@ class PandasDataProviderRespondingClientsNoOutliers(PandasDataProviderFromCSV):
             
             if remove_all:self.data = self.data.drop([27,43,349,614,374,448,479,617,966,1293,1335,1549])                #drop outliers
             
+            self.data['Count_CA']=self.data['Count_CA'].astype('float64')
+            self.data['Age']=self.data['Age'].astype('float64')
+            self.data['Tenure']=self.data['Tenure'].astype('float64')
+            self.data['Sale_Multiclass']=self.data['Sale_Multiclass'].astype('float64')
+
             # self.data = all_data[all_data.Sale_CC == -1]    #predictions data
             # transform data using pipelines
 

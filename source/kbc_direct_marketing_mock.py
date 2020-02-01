@@ -111,6 +111,9 @@ def main(arguments):
             elif configuration['model']['type'] == 'vanilla_LassoLarsIC_regression': model = VanillaModelLassoLarsIC(configuration)
             elif configuration['model']['type'] == 'vanilla_classification': model = VanillaModelClassification(configuration)
             elif configuration['model']['type'] == 'advanced_classification': model = AdvancedModelClassification(configuration)
+            elif configuration['model']['type'] == 'advanced_classification_svc': model = AdvancedModelClassificationSVC(configuration)
+            elif configuration['model']['type'] == 'advanced_classification_mlp': model = AdvancedModelClassificationMLP(configuration)
+            elif configuration['model']['type'] == 'advanced_classification_rf': model = AdvancedModelClassificationRF(configuration)
             elif configuration['model']['type'] == 'advanced_regression': model = AdvancedModelRegression(configuration)
             else: raise NotImplementedError
             
@@ -153,6 +156,8 @@ def main(arguments):
                             view = ViewModelMulticlassProbabilityCorrelations(view_name)
                     elif configuration[view_name]['type'] == 'multiclassification_confusion_matrix':
                             view = ViewModelConfusionMatrix(view_name)
+                    elif configuration[view_name]['type'] == 'multiclassification_roc':
+                            view = ViewModelROC(view_name)
                     else: view = View(view_name)
                     view.set_model(model)
                     view.set_style(style)
@@ -166,7 +171,7 @@ def main(arguments):
 
             document.save(serializer)
             configuration['command']=' '.join(sys.argv)
-            document.save_config(config)
+            document.save_config(config,arguments.dir)
 
 
         return 0
