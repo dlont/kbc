@@ -22,7 +22,7 @@ class Serializer(object):
         def move_builddir_to_outputfolder(self):
                 print(self._buildfolder, self._outputfolder, (self._buildfolder and self._outputfolder))
                 if self._buildfolder is not None and self._outputfolder is not None:
-                        for extension in ['pdf','png','tex']:
+                        for extension in ['pkl','csv','pdf','png','tex']:
                                 for file in glob.glob('{}/*.{}'.format(self._buildfolder,extension)):
                                         shutil.move(file, self._outputfolder)
 

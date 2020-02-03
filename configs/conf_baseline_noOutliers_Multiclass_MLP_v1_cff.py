@@ -9,15 +9,15 @@ config={
    'output_filename':'build/Multiclassification_MLP.pkl',
    'data_provider':'model_data_provider',
    'do_training':True,
-   'input_features':['Sex', 'Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'TransactionsCred', 'TransactionsCred_CA', 'VolumeDeb', 'VolumeDeb_CA', 'VolumeDebCash_Card', 'VolumeDebCashless_Card', 'VolumeDeb_PaymentOrder', 'TransactionsDeb', 'TransactionsDeb_CA', 'TransactionsDebCash_Card', 'TransactionsDebCashless_Card', 'TransactionsDeb_PaymentOrder', 'Count_CA', 'Count_SA', 'Count_MF', 'Count_OVD', 'Count_CC', 'Count_CL', 'ActBal_CA', 'ActBal_SA', 'ActBal_MF', 'ActBal_OVD', 'ActBal_CC', 'ActBal_CL'],
+#    'input_features':['Sex', 'Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'TransactionsCred', 'TransactionsCred_CA', 'VolumeDeb', 'VolumeDeb_CA', 'VolumeDebCash_Card', 'VolumeDebCashless_Card', 'VolumeDeb_PaymentOrder', 'TransactionsDeb', 'TransactionsDeb_CA', 'TransactionsDebCash_Card', 'TransactionsDebCashless_Card', 'TransactionsDeb_PaymentOrder', 'Count_CA', 'Count_SA', 'Count_MF', 'Count_OVD', 'Count_CC', 'Count_CL', 'ActBal_CA', 'ActBal_SA', 'ActBal_MF', 'ActBal_OVD', 'ActBal_CC', 'ActBal_CL'],
+   'input_features':['Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'VolumeDeb', 'ActBal_CA', 'ActBal_SA'],
 #    'target':['Sale_Multiclass'],
    'target':[0,1,2,3,4],
-   'alpha':[0.0001,0.1,10.],
-   # 'alpha':[0.1],
+   'alpha':[0.001,0.1,1.,10,50],
    # 'hidden_layer_sizes':[(5, )],
-   'hidden_layer_sizes':[(100),(5,5),(30,30),(100,100)],
+   'hidden_layer_sizes':[(5, 5),(10,10)],
    'activation':'relu',
-   'max_iter':[1000,5000,10000]
+   'max_iter':[10000]
    # 'max_iter':[1000,5000,10000,50000]
    # 'activation':'logistic',
    # 'max_iter':[5,10,20,30,50,500,1000,5000]

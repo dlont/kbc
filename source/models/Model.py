@@ -1,9 +1,27 @@
 import pandas as pd
 import numpy as np
 
+import pickle
+import time
+
 from logwith import *
 
 from dataprovider import *
+
+# Utility function to report best scores
+def report(results, n_top=3):
+        for i in range(1, n_top + 1):
+                candidates = np.flatnonzero(results['rank_test_score'] == i)
+                for candidate in candidates:
+                        print("Model with rank: {0}".format(i))
+                        print("Mean validation score: {0:.3f} (std: {1:.3f})"
+                                .format(results['mean_test_score'][candidate],
+                                        results['std_test_score'][candidate]))
+                        print("Mean training score: {0:.3f} (std: {1:.3f})"
+                                .format(results['mean_train_score'][candidate],
+                                        results['std_train_score'][candidate]))
+                        print("Parameters: {0}".format(results['params'][candidate]))
+                        print("")
 
 class Model(object):
         def __init__(self,configuration):
@@ -31,6 +49,88 @@ class Model(object):
 
         @log_with()
         def predict_kaggle_output(ml_model):
+                pass
+
+class AdvancedModelClassificationOvRRF(Model):
+        def __init__(self,configuration):
+                self._configuration = configuration
+                self._objects = {}
+                self._annotation = 'One VS Rest multiclass Random Forest model'
+                if 'annotation' in self._configuration:
+                        self._annotation = self._configuration['annotation']
+                self.do_training = self._configuration['model'].get('do_training',False)
+                self.fit_results = None
+                self.my_model = None
+                self.Initialize()
+
+        @log_with()
+        def Initialize(self):
+                if self.do_training: self.build_best_prediction()
+                pass
+
+        @log_with()
+        def get(self,name):
+                """
+                Factory method
+                """
+                if name in self._objects:
+                        return self._objects[name]
+                else:
+                        return None #provide factory method implementation here
+                return self._objects[name]
+
+        @log_with()
+        def get_data_provider(self,provider_name):
+                """
+                Factory method for data providers
+                """
+                if provider_name in self._objects:
+                        return self._objects[provider_name]
+                else:
+                        if '.csv' in self._configuration[provider_name]['input_file']:
+                                if self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClients': 
+                                        raise NotImplementedError
+                                elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliers': 
+                                        provider = PandasDataProviderRespondingClientsNoOutliers(self._configuration[provider_name]['input_file'],
+                                        remove_all=self._configuration[provider_name]['remove_all'],training_set=self._configuration[provider_name]['training_set'])
+                                else: raise NotImplementedError
+                                self._objects[provider_name] = provider
+                        else: raise NotImplementedError
+                return self._objects[provider_name]
+
+        @log_with()
+        def build_best_prediction(self):
+                print("Building advanced multiclass RF model with outliers removed!")
+                from sklearn.ensemble import RandomForestClassifier
+                from sklearn.multiclass import OneVsRestClassifier
+                from sklearn.multiclass import OneVsOneClassifier
+                
+                data_provider = self.get_data_provider(self._configuration['model']['data_provider'])
+                target_variable_names = self._configuration['model']['target']
+                input_features_names = self._configuration['model']['input_features']
+
+                self.my_model = RandomForestClassifier(criterion=self._configuration['model']['criterion'],
+                                                       class_weight=self._configuration['model']['class_weight'])
+                # use a full grid over all parameters
+                param_grid = {'estimator__n_estimators': self._configuration['model']['n_estimators'],
+                              'estimator__min_samples_leaf':self._configuration['model']['min_samples_leaf'],
+                              'estimator__max_depth':self._configuration['model']['max_depth']}
+
+                # run grid search
+                from sklearn.model_selection import GridSearchCV
+                grid_search = GridSearchCV(OneVsRestClassifier(self.my_model), param_grid=param_grid,return_train_score=True,scoring='roc_auc_ovo')
+                start = time.time()
+                grid_search.fit(data_provider.train[input_features_names], data_provider.train[target_variable_names])
+                print("GridSearchCV took %.2f seconds for %d candidate parameter settings." % (time.time() - start, len(grid_search.cv_results_['params'])))
+
+                report(grid_search.cv_results_)
+
+                self.my_model = grid_search.best_estimator_
+                self.fit_results = grid_search.cv_results_
+
+                # self.fit_results = self.my_model.evals_result()
+                pickle.dump(self.my_model, open(self._configuration['model']['output_filename'], 'wb'))
+
                 pass
 
 class AdvancedModelClassificationRF(Model):
@@ -74,58 +174,42 @@ class AdvancedModelClassificationRF(Model):
                                         raise NotImplementedError
                                 elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliers': 
                                         provider = PandasDataProviderRespondingClientsNoOutliers(self._configuration[provider_name]['input_file'],
-                                        self._configuration[provider_name]['remove_all'])
+                                        remove_all=self._configuration[provider_name]['remove_all'],training_set=self._configuration[provider_name]['training_set'])
                                 else: raise NotImplementedError
                                 self._objects[provider_name] = provider
                         else: raise NotImplementedError
                 return self._objects[provider_name]
-  
+
         @log_with()
         def build_best_prediction(self):
                 print("Building advanced multiclass RF model with outliers removed!")
                 from sklearn.ensemble import RandomForestClassifier
-                from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error
                 
-                target_variable_names = self._configuration['model']['target']
                 data_provider = self.get_data_provider(self._configuration['model']['data_provider'])
 
+                target_variable_names = self._configuration['model']['target']
                 input_features_names = self._configuration['model']['input_features']
-                X_train = data_provider.train[input_features_names]
-                y_train = np.ravel(data_provider.train[target_variable_names])
 
-                X_test = data_provider.test[input_features_names]
-                y_test = data_provider.test[target_variable_names]
-
-                # print X_train.dtypes
-                # print X_train.head()
-                # print X_test.dtypes
-                # print X_test.head()
-
-                # print y_train.dtypes
-                # print y_train.head()
-                # print y_test.dtypes
-                # print y_test.head()
-
-                # eval_set = [(X_train, y_train), (X_test, y_test)]
-
-                self.my_model = RandomForestClassifier(n_estimators=self._configuration['model']['n_estimators'],
-                                                       max_depth=self._configuration['model']['max_depth'],
-                                                       criterion=self._configuration['model']['criterion'],
+                self.my_model = RandomForestClassifier(criterion=self._configuration['model']['criterion'],
                                                        class_weight=self._configuration['model']['class_weight'])
-                self.my_model.fit(X_train, y_train)
+                # use a full grid over all parameters
+                param_grid = {'n_estimators': self._configuration['model']['n_estimators'],
+                              'min_samples_leaf':self._configuration['model']['min_samples_leaf'],
+                              'max_depth':self._configuration['model']['max_depth']}
 
-                from sklearn.inspection import permutation_importance
-                result = permutation_importance(self.my_model, X_train, y_train, n_repeats=10,random_state=42)
-                perm_sorted_idx = result.importances_mean.argsort()
-                print(perm_sorted_idx)
+                # run grid search
+                from sklearn.model_selection import GridSearchCV
+                grid_search = GridSearchCV(self.my_model, param_grid=param_grid,return_train_score=True,scoring='roc_auc_ovr')
+                start = time.time()
+                grid_search.fit(data_provider.train[input_features_names], np.ravel(data_provider.train[target_variable_names]))
+                print("GridSearchCV took %.2f seconds for %d candidate parameter settings." % (time.time() - start, len(grid_search.cv_results_['params'])))
 
-                # y_pred = self.my_model.predict(X_test)
-                # print "Max error: ", max_error(y_test,y_pred)
-                # print "Explained variance score: ", explained_variance_score(y_test,y_pred)
-                # print "Mean absolute error: ", mean_absolute_error(y_test,y_pred)
-                # print "Mean squared error: ", mean_squared_error(y_test,y_pred)
+                report(grid_search.cv_results_)
+
+                self.my_model = grid_search.best_estimator_
 
                 # self.fit_results = self.my_model.evals_result()
+                pickle.dump(self.my_model, open(self._configuration['model']['output_filename'], 'wb'))
 
                 pass
 
@@ -170,7 +254,7 @@ class AdvancedModelClassificationMLP(Model):
                                         raise NotImplementedError
                                 elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliers': 
                                         provider = PandasDataProviderRespondingClientsNoOutliers(self._configuration[provider_name]['input_file'],
-                                        self._configuration[provider_name]['remove_all'])
+                                        remove_all=self._configuration[provider_name]['remove_all'],training_set=self._configuration[provider_name]['training_set'])
                                 else: raise NotImplementedError
                                 self._objects[provider_name] = provider
                         else: raise NotImplementedError
@@ -192,19 +276,25 @@ class AdvancedModelClassificationMLP(Model):
                 X_test = data_provider.test[input_features_names]
                 y_test = data_provider.test[target_variable_names]
 
-                # print X_train.dtypes
-                # print X_train.head()
-                # print X_test.dtypes
-                # print X_test.head()
+                self.my_model = MLPClassifier(activation=self._configuration['model']['activation'])
 
-                # print y_train.dtypes
-                # print y_train.head()
-                # print y_test.dtypes
-                # print y_test.head()
+                # use a full grid over all parameters
+                param_grid = {'estimator__alpha': self._configuration['model']['alpha'],
+                              'estimator__max_iter':self._configuration['model']['max_iter'],
+                              'estimator__hidden_layer_sizes':self._configuration['model']['hidden_layer_sizes']}
 
-                # eval_set = [(X_train, y_train), (X_test, y_test)]
+                # run grid search
+                from sklearn.model_selection import GridSearchCV
+                from sklearn.multiclass import OneVsRestClassifier
+                grid_search = GridSearchCV(OneVsRestClassifier(self.my_model), param_grid=param_grid,return_train_score=True,scoring='roc_auc_ovr')
+                start = time.time()
+                grid_search.fit(data_provider.train[input_features_names],  data_provider.train[target_variable_names])
+                print("GridSearchCV took %.2f seconds for %d candidate parameter settings." % (time.time() - start, len(grid_search.cv_results_['params'])))
 
-                self.my_model = MLPClassifier(alpha=self._configuration['model']['alpha'], max_iter=self._configuration['model']['max_iter'])
+                report(grid_search.cv_results_)
+
+                self.my_model = grid_search.best_estimator_
+
                 self.my_model.fit(X_train, y_train)
 
                 # y_pred = self.my_model.predict(X_test)
@@ -214,6 +304,7 @@ class AdvancedModelClassificationMLP(Model):
                 # print "Mean squared error: ", mean_squared_error(y_test,y_pred)
 
                 # self.fit_results = self.my_model.evals_result()
+                pickle.dump(self.my_model, open(self._configuration['model']['output_filename'], 'wb'))
 
                 pass
 
@@ -258,7 +349,7 @@ class AdvancedModelClassificationSVC(Model):
                                         raise NotImplementedError
                                 elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliers': 
                                         provider = PandasDataProviderRespondingClientsNoOutliers(self._configuration[provider_name]['input_file'],
-                                        self._configuration[provider_name]['remove_all'])
+                                        remove_all=self._configuration[provider_name]['remove_all'],training_set=self._configuration[provider_name]['training_set'])
                                 else: raise NotImplementedError
                                 self._objects[provider_name] = provider
                         else: raise NotImplementedError
@@ -292,7 +383,7 @@ class AdvancedModelClassificationSVC(Model):
 
                 # eval_set = [(X_train, y_train), (X_test, y_test)]
 
-                self.my_model = svm.SVC(kernel=self._configuration['model']['kernel'], C=self._configuration['model']['C'],verbose=True)
+                self.my_model = svm.SVC(kernel=self._configuration['model']['kernel'], C=self._configuration['model']['C'])
                 self.my_model.fit(X_train, y_train)
 
                 # y_pred = self.my_model.predict(X_test)
@@ -301,10 +392,63 @@ class AdvancedModelClassificationSVC(Model):
                 # print "Mean absolute error: ", mean_absolute_error(y_test,y_pred)
                 # print "Mean squared error: ", mean_squared_error(y_test,y_pred)
 
-                self.fit_results = self.my_model.evals_result()
+                # self.fit_results = self.my_model.evals_result()
+                pickle.dump(self.my_model, open(self._configuration['model']['output_filename'], 'wb'))
 
                 pass
 
+class PredictionModel(Model):
+        def __init__(self,configuration):
+                self._configuration = configuration
+                self._objects = {}
+                self._annotation = 'Predictions for KBC test task'
+                if 'annotation' in self._configuration:
+                        self._annotation = self._configuration['annotation']
+                self.do_training = self._configuration['model'].get('do_training',False)
+                self.my_multiclassification = None
+                self.my_revenue_mf = None
+                self.my_revenue_cc = None
+                self.my_revenue_cl = None
+
+                self.Initialize()
+
+        @log_with()
+        def Initialize(self):
+                self.my_multiclassification = pickle.load(open(self._configuration['model']['multiclass_model'], 'rb'))
+                self.my_revenue_mf = pickle.load(open(self._configuration['model']['regression_MF'], 'rb'))
+                self.my_revenue_cc = pickle.load(open(self._configuration['model']['regression_CC'], 'rb'))
+                self.my_revenue_cl = pickle.load(open(self._configuration['model']['regression_CL'], 'rb'))
+                pass
+
+        @log_with()
+        def get(self,name):
+                """
+                Factory method
+                """
+                if name in self._objects:
+                        return self._objects[name]
+                else:
+                        return None #provide factory method implementation here
+                return self._objects[name]
+
+        @log_with()
+        def get_data_provider(self,provider_name):
+                """
+                Factory method for data providers
+                """
+                if provider_name in self._objects:
+                        return self._objects[provider_name]
+                else:
+                        if '.csv' in self._configuration[provider_name]['input_file']:
+                                if self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClients': 
+                                        raise NotImplementedError
+                                elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliers': 
+                                        provider = PandasDataProviderRespondingClientsNoOutliers(self._configuration[provider_name]['input_file'],
+                                        remove_all=self._configuration[provider_name]['remove_all'],training_set=self._configuration[provider_name]['training_set'])
+                                else: raise NotImplementedError
+                                self._objects[provider_name] = provider
+                        else: raise NotImplementedError
+                return self._objects[provider_name]
 
 class AdvancedModelClassification(Model):
         def __init__(self,configuration):
@@ -347,12 +491,12 @@ class AdvancedModelClassification(Model):
                                         raise NotImplementedError
                                 elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliers': 
                                         provider = PandasDataProviderRespondingClientsNoOutliers(self._configuration[provider_name]['input_file'],
-                                        self._configuration[provider_name]['remove_all'])
+                                        remove_all=self._configuration[provider_name]['remove_all'],training_set=self._configuration[provider_name]['training_set'])
                                 else: raise NotImplementedError
                                 self._objects[provider_name] = provider
                         else: raise NotImplementedError
                 return self._objects[provider_name]
-  
+
         @log_with()
         def build_best_prediction(self):
                 print("Building advanced multiclass XGBoost model with outliers removed!")
@@ -395,7 +539,7 @@ class AdvancedModelClassification(Model):
                 # print "Mean squared error: ", mean_squared_error(y_test,y_pred)
 
                 self.fit_results = self.my_model.evals_result()
-
+                pickle.dump(self.my_model, open(self._configuration['model']['output_filename'], 'wb'))
 
                 pass
 
@@ -430,6 +574,7 @@ class AdvancedModelRegression(Model):
                 if 'annotation' in self._configuration:
                         self._annotation = self._configuration['annotation']
                 self.fit_results = None
+                self.my_model = None
                 self.Initialize()
 
         @log_with()
@@ -458,16 +603,16 @@ class AdvancedModelRegression(Model):
                 else:
                         if '.csv' in self._configuration[provider_name]['input_file']:
                                 if self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsRevenueMF': 
-                                        provider = PandasDataProviderRespondingClientsRevenueMF(self._configuration[provider_name]['input_file'])
+                                        provider = PandasDataProviderRespondingClientsRevenueMF(self._configuration[provider_name]['input_file'],training_set=self._configuration[provider_name]['training_set'])
                                 elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliersRevenueMF': 
                                         provider = PandasDataProviderRespondingClientsNoOutliersRevenueMF(self._configuration[provider_name]['input_file'],
-                                        self._configuration[provider_name]['remove_all'])
+                                        self._configuration[provider_name]['remove_all'],training_set=self._configuration[provider_name]['training_set'])
                                 elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliersRevenueCC': 
                                         provider = PandasDataProviderRespondingClientsNoOutliersRevenueCC(self._configuration[provider_name]['input_file'],
-                                        self._configuration[provider_name]['remove_all'])
+                                        self._configuration[provider_name]['remove_all'],training_set=self._configuration[provider_name]['training_set'])
                                 elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliersRevenueCL': 
                                         provider = PandasDataProviderRespondingClientsNoOutliersRevenueCL(self._configuration[provider_name]['input_file'],
-                                        self._configuration[provider_name]['remove_all'])
+                                        self._configuration[provider_name]['remove_all'],training_set=self._configuration[provider_name]['training_set'])
                                 else: raise NotImplementedError
                                 self._objects[provider_name] = provider
                         else: raise NotImplementedError
@@ -504,21 +649,22 @@ class AdvancedModelRegression(Model):
 
                 eval_set = [(X_train, y_train), (X_test, y_test)]
 
-                my_model = XGBRegressor(n_estimators=self._configuration['model']['n_estimators'],
+                self.my_model = XGBRegressor(n_estimators=self._configuration['model']['n_estimators'],
                                         max_depth=self._configuration['model']['max_depth'],
                                         learning_rate=self._configuration['model']['learning_rate'],
                                         verbosity=0)
-                my_model.fit(X_train, y_train, eval_metric=["rmse", "mae"], eval_set=eval_set, verbose=False)
+                self.my_model.fit(X_train, y_train, eval_metric=["rmse", "mae"], eval_set=eval_set, verbose=False)
 
-                y_pred = my_model.predict(X_test)
+                y_pred = self.my_model.predict(X_test)
                 # print "Max error: ", max_error(y_test,y_pred)
                 print ("Explained variance score: ", explained_variance_score(y_test,y_pred))
                 print ("Mean absolute error: ", mean_absolute_error(y_test,y_pred))
                 print ("Mean squared error: ", mean_squared_error(y_test,y_pred))
 
-                self.fit_results = my_model.evals_result()
+                self.fit_results = self.my_model.evals_result()
                 # print 'YO importance'
                 # plot_importance(my_model)
+                pickle.dump(self.my_model, open(self._configuration['model']['output_filename'], 'wb'))
 
                 pass
 
@@ -529,6 +675,7 @@ class VanillaModelRegression(Model):
                 self._annotation = 'Performance comparision of different MVA discriminants'
                 if 'annotation' in self._configuration:
                         self._annotation = self._configuration['annotation']
+                self.my_model = None
                 self.fit_results = None
                 self.Initialize()
 
@@ -594,11 +741,11 @@ class VanillaModelRegression(Model):
 
                 eval_set = [(X_train, y_train), (X_test, y_test)]
 
-                my_model = XGBRegressor(n_estimators=self._configuration['model']['n_estimators'],
+                self.my_model = XGBRegressor(n_estimators=self._configuration['model']['n_estimators'],
                                         max_depth=self._configuration['model']['max_depth'],
                                         learning_rate=self._configuration['model']['learning_rate'],
                                         verbosity=0)
-                my_model.fit(X_train, y_train, eval_metric=["rmse", "mae"], eval_set=eval_set, verbose=False)
+                self.my_model.fit(X_train, y_train, eval_metric=["rmse", "mae"], eval_set=eval_set, verbose=False)
 
                 y_pred = my_model.predict(X_test)
                 # print "Max error: ", max_error(y_test,y_pred)
@@ -606,9 +753,10 @@ class VanillaModelRegression(Model):
                 print ("Mean absolute error: ", mean_absolute_error(y_test,y_pred))
                 print ("Mean squared error: ", mean_squared_error(y_test,y_pred))
 
-                self.fit_results = my_model.evals_result()
+                self.fit_results = self.my_model.evals_result()
                 # print 'YO importance'
                 # plot_importance(my_model)
+                pickle.dump(self.my_model, open(self._configuration['model']['output_filename'], 'wb'))
 
                 pass
 
@@ -619,6 +767,7 @@ class VanillaModelLassoLarsIC(Model):
                 self._annotation = 'Ridge linear regression with built-in CV'
                 if 'annotation' in self._configuration:
                         self._annotation = self._configuration['annotation']
+                self.my_model = None
                 self.fit_results = None
                 self.Initialize()
 
@@ -698,6 +847,7 @@ class VanillaModelLassoLarsIC(Model):
                 print ("BIC Mean squared error: ", mean_squared_error(y_test,y_pred_bic))
 
                 self.fit_results = {'aic':my_model_aic, 'bic':my_model_bic}
+                pickle.dump(self.my_model, open(self._configuration['model']['output_filename'], 'wb'))
 
                 pass
 class VanillaModelClassification(Model):
@@ -707,6 +857,7 @@ class VanillaModelClassification(Model):
                 self._annotation = 'Performance comparision of different MVA discriminants'
                 if 'annotation' in self._configuration:
                         self._annotation = self._configuration['annotation']
+                self.my_model = None
                 self.fit_results = None
                 self.Initialize()
 
@@ -771,11 +922,11 @@ class VanillaModelClassification(Model):
 
                 eval_set = [(X_train, y_train), (X_test, y_test)]
 
-                my_model = XGBClassifier(n_estimators=self._configuration['model']['n_estimators'],
+                self.my_model = XGBClassifier(n_estimators=self._configuration['model']['n_estimators'],
                                         max_depth=self._configuration['model']['max_depth'],
                                         learning_rate=self._configuration['model']['learning_rate'],
                                         verbosity=0)
-                my_model.fit(X_train, y_train, eval_metric=["error", "auc", "map"], eval_set=eval_set, verbose=False)
+                self.my_model.fit(X_train, y_train, eval_metric=["error", "auc", "map"], eval_set=eval_set, verbose=False)
 
                 # y_pred = my_model.predict(X_test)
                 # print "Max error: ", max_error(y_test,y_pred)
@@ -786,6 +937,7 @@ class VanillaModelClassification(Model):
                 self.fit_results = my_model.evals_result()
                 # print 'YO importance'
                 # plot_importance(my_model)
+                pickle.dump(self.my_model, open(self._configuration['model']['output_filename'], 'wb'))
 
                 pass
 

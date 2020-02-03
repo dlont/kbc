@@ -8,10 +8,10 @@ config={
    'type':'advanced_classification_svc',
    'data_provider':'model_data_provider',
    'do_training':True,
-   'input_features':['Sex', 'Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'TransactionsCred', 'TransactionsCred_CA', 'VolumeDeb', 'VolumeDeb_CA', 'VolumeDebCash_Card', 'VolumeDebCashless_Card', 'VolumeDeb_PaymentOrder', 'TransactionsDeb', 'TransactionsDeb_CA', 'TransactionsDebCash_Card', 'TransactionsDebCashless_Card', 'TransactionsDeb_PaymentOrder', 'Count_CA', 'Count_SA', 'Count_MF', 'Count_OVD', 'Count_CC', 'Count_CL', 'ActBal_CA', 'ActBal_SA', 'ActBal_MF', 'ActBal_OVD', 'ActBal_CC', 'ActBal_CL'],
+   'input_features':['Age', 'Tenure','Count_CA', 'Count_SA'],
    'target':['Sale_Multiclass'],
-   'kernel':'linear',
-   'C':1.0
+   'kernel':'rbf',
+   'C':1
   },
   'mode': 'report',
 #   'views':['learning_curve','output_classifier','prob_correlations','confusion_matrix'],

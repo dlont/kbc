@@ -2,7 +2,8 @@ import os
 import textwrap
 import pprint as pp
 
-
+import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 from logwith import *
@@ -38,6 +39,9 @@ class View(object):
         def get_outfile_name(self,substring=''):
                 for ext in self._outfileextension.split(","):
                         yield '{}/{}{}.{}'.format(self._outputfolder,self._outfilename,substring,ext)
+        @log_with()
+        def get_single_outfile_name(self):
+                return '{}/{}'.format(self._outputfolder,self._outfilename)
 
         @log_with()
         def annotate(self,type):
@@ -46,9 +50,9 @@ class View(object):
                         normal_text = "\033[0;37;40m"
                         if self.view_name in self.model._configuration:
                                 if 'annotation' in self.model._configuration[self.view_name]:
-                                        print("\n".join(textwrap.wrap(f"bcolors.OKBLUE"+
+                                        print("\n".join(textwrap.wrap(f"{bcolors.OKBLUE}"+
                                                 self.model._configuration[self.view_name]['annotation']+
-                                                f"bcolors.ENDC", 120)))
+                                                f"{bcolors.ENDC}", 120)))
                 elif type == "tex":
                         logging.warning("Annotation format: {}. Not implemented yet!".format(type))
                 elif type == "md":
@@ -597,9 +601,10 @@ class ViewModelMulticlassProbabilityCorrelations(View):
                 X_test = data_provider.test[input_features_names]
                 y_test = data_provider.test[target_variable_names]
 
+                n_classes = len(data_provider.data[target_variable_names[0]].unique())
                 for pad,distribution in enumerate(self.model._configuration[self.view_name]['distributions']):
-                        y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),4)
-                        y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),4)
+                        y_prob_train = self.model.my_model.predict_proba(X_train).reshape(len(X_train),n_classes)
+                        y_prob_test  = self.model.my_model.predict_proba(X_test).reshape(len(X_test),n_classes)
 
                         feature_1, feature_2 = self.model._configuration[self.view_name][distribution]['features_id'][0]
                         class1_training_f1 = y_prob_train[::,feature_1]
@@ -639,6 +644,75 @@ class ViewModelMulticlassProbabilityCorrelations(View):
                 for name in self.get_outfile_name(): plt.savefig(name)
                 plt.close(fig)
 
+class ViewModelMulticlassOvRProbabilityCorrelations(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                pads = axes.flatten()
+
+                target_variable_names = self.model._configuration['model']['target']
+                data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
+
+                input_features_names = self.model._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+
+                n_classes = len(data_provider.data[target_variable_names[0]].unique())
+                for pad,distribution in enumerate(self.model._configuration[self.view_name]['distributions']):
+                        y_prob_train = self.model.my_model.predict_proba(X_train)
+                        y_prob_test  = self.model.my_model.predict_proba(X_test)
+
+                        feature_1, feature_2 = self.model._configuration[self.view_name][distribution]['features_id'][0]
+                        class1_training_f1 = y_prob_train[::,feature_1]
+                        class1_training_f2 = y_prob_train[::,feature_2]
+                        pads[pad].scatter(class1_training_f1, class1_training_f2,
+                                        color=self.model._configuration[self.view_name][distribution]['class0_color_train'],
+                                        label=self.model._configuration[self.view_name][distribution]['class0_label_train'],
+                                        marker=self.model._configuration[self.view_name][distribution]['class0_marker_train'], alpha = 0.5)
+
+                        feature_1, feature_2 = self.model._configuration[self.view_name][distribution]['features_id'][1]
+                        class1_training_f1 = y_prob_train[::,feature_1] 
+                        class1_training_f2 = y_prob_train[::,feature_2] 
+                        pads[pad].scatter(class1_training_f1, class1_training_f2,
+                                        color=self.model._configuration[self.view_name][distribution]['class1_color_train'],
+                                        label=self.model._configuration[self.view_name][distribution]['class1_label_train'],
+                                        marker=self.model._configuration[self.view_name][distribution]['class1_marker_train'], alpha = 0.5)
+
+                        feature_1, feature_2 = self.model._configuration[self.view_name][distribution]['features_id'][2]
+                        class2_training_f1 = y_prob_train[::,feature_1]
+                        class2_training_f2 = y_prob_train[::,feature_2]
+                        pads[pad].scatter(class2_training_f1, class2_training_f2,
+                                        color=self.model._configuration[self.view_name][distribution]['class2_color_train'],
+                                        label=self.model._configuration[self.view_name][distribution]['class2_label_train'],
+                                        marker=self.model._configuration[self.view_name][distribution]['class2_marker_train'], alpha = 0.5)
+
+                        pads[pad].set_xlabel(self.model._configuration[self.view_name][distribution]['xlabel'])
+                        pads[pad].set_ylabel(self.model._configuration[self.view_name][distribution]['ylabel'])
+                        pads[pad].legend()
+                        pass
+                        # else: 
+                        #         logging.error('Unknown distribution type: {}'.format(distribution))
+                        #         raise NotImplementedError
+
+                fig.tight_layout()
+                # plt.show()
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
+
+
 class ViewModelROC(View):
         @log_with()
         def __init__(self,view_name=None):
@@ -653,80 +727,381 @@ class ViewModelROC(View):
                 from sklearn.preprocessing import label_binarize
                 from scipy import interp
 
-                # Compute ROC curve and ROC area for each class
-                fpr = dict()
-                tpr = dict()
-                roc_auc = dict()
-
                 target_variable_names = self.model._configuration['model']['target']
                 data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
                 input_features_names = self.model._configuration['model']['input_features']
 
                 y       = data_provider.data[target_variable_names]
                 X_train = data_provider.train[input_features_names]
-                y_train = data_provider.train[target_variable_names]
+                y_train = np.array(data_provider.train[target_variable_names])
+                y_pred_train = self.model.my_model.predict(X_train)
+                y_score_train = np.array(self.model.my_model.predict_proba(X_train))
                 X_test = data_provider.test[input_features_names]
-                y_test = data_provider.test[target_variable_names]
-                y_score= self.model.fit_results.decision_function(X_test)
+                y_test = np.array(data_provider.test[target_variable_names])
+                y_pred_test = self.model.my_model.predict(X_test)
+                y_score_test= np.array(self.model.my_model.predict_proba(X_test))
 
-                # Binarize the output
-                y = label_binarize(y, classes=[0, 1, 2, 3])
+                # Compute ROC curve and ROC area for each class
+                fpr = dict()
+                tpr = dict()
+                roc_auc = dict()
+                fpr_train = dict()
+                tpr_train = dict()
+                roc_auc_train = dict()
                 n_classes = y.shape[1]
 
                 for i in range(n_classes):
-                        fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+                        fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score_test[:, i])
                         roc_auc[i] = auc(fpr[i], tpr[i])
+                        fpr_train[i], tpr_train[i], _ = roc_curve(y_train[:, i], y_score_train[:, i])
+                        roc_auc_train[i] = auc(fpr_train[i], tpr_train[i])
 
                 # Compute micro-average ROC curve and ROC area
-                fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
+                fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score_test.ravel())
                 roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
-
+                fpr_train["micro"], tpr_train["micro"], _ = roc_curve(y_train.ravel(), y_score_train.ravel())
+                roc_auc_train["micro"] = auc(fpr_train["micro"], tpr_train["micro"])
                 # First aggregate all false positive rates
                 all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
-
+                all_fpr_train = np.unique(np.concatenate([fpr_train[i] for i in range(n_classes)]))
                 # Then interpolate all ROC curves at this points
                 mean_tpr = np.zeros_like(all_fpr)
-                for i in range(n_classes):
+                mean_tpr_train = np.zeros_like(all_fpr_train)
+                for i in range(n_classes): 
                         mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+                        mean_tpr_train += interp(all_fpr_train, fpr_train[i], tpr_train[i])
 
                 # Finally average it and compute AUC
                 mean_tpr /= n_classes
+                mean_tpr_train /= n_classes
 
                 fpr["macro"] = all_fpr
                 tpr["macro"] = mean_tpr
                 roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+                fpr_train["macro"] = all_fpr_train
+                tpr_train["macro"] = mean_tpr_train
+                roc_auc_train["macro"] = auc(fpr_train["macro"], tpr_train["macro"])
 
-                # Plot all ROC curves
-                plt.figure()
-                plt.plot(fpr["micro"], tpr["micro"],
-                        label='micro-average ROC curve (area = {0:0.2f})'
-                        ''.format(roc_auc["micro"]),
-                        color='deeppink', linestyle=':', linewidth=4)
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                pads = axes.flatten()
+                for pad,metric in enumerate(self.model._configuration[self.view_name]['metrics']):
+                        if metric == 'individual':
+                                lw = 2
+                                colors = ['aqua', 'darkorange', 'cornflowerblue','magenta','lime']
+                                for i, color in zip(range(n_classes), colors):
+                                        pads[pad].plot(fpr[i], tpr[i], color=color, lw=lw,
+                                                label='ROC curve of class {0} (area = {1:0.2f})'
+                                                ''.format(i, roc_auc[i]))
 
-                plt.plot(fpr["macro"], tpr["macro"],
-                        label='macro-average ROC curve (area = {0:0.2f})'
-                        ''.format(roc_auc["macro"]),
-                        color='navy', linestyle=':', linewidth=4)
+                                pads[pad].plot([0, 1], [0, 1], 'k--', lw=lw)
+                                pads[pad].set_xlim([0.0, 1.0])
+                                pads[pad].set_ylim([0.0, 1.05])
+                                pads[pad].set_xlabel('False Positive Rate')
+                                pads[pad].set_ylabel('True Positive Rate')
+                                pads[pad].set_title('Multiclass Receiver Operating Characteristic')
+                                pads[pad].legend(loc="lower right")
+                        elif metric == 'average':
+                                # Plot all ROC curves
+                                pads[pad].plot(fpr["micro"], tpr["micro"],
+                                        label='micro-average ROC test (area = {0:0.2f})'
+                                        ''.format(roc_auc["micro"]),
+                                        color='deeppink', linestyle=':', linewidth=4)
+                                pads[pad].plot(fpr["macro"], tpr["macro"],
+                                        label='macro-average ROC test (area = {0:0.2f})'
+                                        ''.format(roc_auc["macro"]),
+                                        color='navy', linestyle=':', linewidth=4)
+                                pads[pad].plot(fpr_train["micro"], tpr_train["micro"],
+                                        label='micro-average ROC train (area = {0:0.2f})'
+                                        ''.format(roc_auc_train["micro"]),
+                                        color='deeppink', linestyle='-', linewidth=4)
+                                pads[pad].plot(fpr_train["macro"], tpr_train["macro"],
+                                        label='macro-average ROC train (area = {0:0.2f})'
+                                        ''.format(roc_auc_train["macro"]),
+                                        color='navy', linestyle='-', linewidth=4)
+                                pads[pad].plot([0, 1], [0, 1], 'k--', lw=lw)
+                                pads[pad].set_xlim([0.0, 1.0])
+                                pads[pad].set_ylim([0.0, 1.05])
+                                pads[pad].set_xlabel('False Positive Rate')
+                                pads[pad].set_ylabel('True Positive Rate')
+                                pads[pad].set_title('Average Multiclass Receiver Operating Characteristic')
+                                pads[pad].legend(loc="lower right")
+                        else: 
+                                logging.error('Unknown metric type: {}'.format(metric))
+                                raise NotImplementedError
 
-                colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
-                for i, color in zip(range(n_classes), colors):
-                        plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                        label='ROC curve of class {0} (area = {1:0.2f})'
-                        ''.format(i, roc_auc[i]))
+                from sklearn.metrics import classification_report
+                target_names = self.model._configuration[self.view_name]['class_names']
+                print('Validation metrics:')
+                print(classification_report(y_test, y_pred_test, target_names=target_names))
+                print('Training metrics:')
+                print(classification_report(y_train, y_pred_train, target_names=target_names))
+                
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
 
-                plt.plot([0, 1], [0, 1], 'k--', lw=lw)
-                plt.xlim([0.0, 1.0])
-                plt.ylim([0.0, 1.05])
-                plt.xlabel('False Positive Rate')
-                plt.ylabel('True Positive Rate')
-                plt.title('Some extension of Receiver operating characteristic to multi-class')
-                plt.legend(loc="lower right")
+class ViewRFModelFeatureImprotanceOvR(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols)                
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                pads = axes.flatten()
+
+                target_variable_names = self.model._configuration['model']['target']
+                data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
+
+                input_features_names = self.model._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = np.array(data_provider.train[target_variable_names])
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+                y_pred = self.model.my_model.predict(X_test)
+
+                from sklearn.inspection import permutation_importance
+
+                for iclass,class_name in enumerate(self.model._configuration[self.view_name]['class_names']):
+                        result = permutation_importance(self.model.my_model.estimators_[iclass], X_train, y_train[:,iclass], n_repeats=10,random_state=42)
+                        perm_sorted_idx = result.importances_mean.argsort()
+                        # print(perm_sorted_idx)
+
+                        tree_importance_sorted_idx = np.argsort(self.model.my_model.estimators_[iclass].feature_importances_)
+                        tree_indices = np.arange(0, len(self.model.my_model.estimators_[iclass].feature_importances_)) + 0.5
+
+                        pads[iclass].barh(tree_indices,
+                                self.model.my_model.estimators_[iclass].feature_importances_[tree_importance_sorted_idx], height=0.7)
+                        pads[iclass].set_yticklabels(X_train.columns[tree_importance_sorted_idx])
+                        pads[iclass].set_yticks(tree_indices)
+                        pads[iclass].set_ylim((0, len(self.model.my_model.estimators_[iclass].feature_importances_)))
+                        pads[iclass].set_title(class_name)
+                        pads[iclass+ncols].boxplot(result.importances[perm_sorted_idx].T, vert=False,
+                                labels=X_train.columns[perm_sorted_idx])
+
+                fig.tight_layout()
                 # plt.show()
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
                 plt.close(fig)
 
+
+class ViewRFModelFeatureImprotance(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+
+                fig, (ax1, ax2) = plt.subplots(1, 2)
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+
+                target_variable_names = self.model._configuration['model']['target']
+                data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
+
+                input_features_names = self.model._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+                y_pred = self.model.my_model.predict(X_test)
+
+                from sklearn.inspection import permutation_importance
+                result = permutation_importance(self.model.my_model, X_train, y_train, n_repeats=10,random_state=42)
+                perm_sorted_idx = result.importances_mean.argsort()
+                # print(perm_sorted_idx)
+
+                tree_importance_sorted_idx = np.argsort(self.model.my_model.feature_importances_)
+                tree_indices = np.arange(0, len(self.model.my_model.feature_importances_)) + 0.5
+
+                ax1.barh(tree_indices,
+                        self.model.my_model.feature_importances_[tree_importance_sorted_idx], height=0.7)
+                ax1.set_yticklabels(X_train.columns[tree_importance_sorted_idx])
+                ax1.set_yticks(tree_indices)
+                ax1.set_ylim((0, len(self.model.my_model.feature_importances_)))
+                ax2.boxplot(result.importances[perm_sorted_idx].T, vert=False,
+                        labels=X_train.columns[perm_sorted_idx])
+
+                fig.tight_layout()
+                # plt.show()
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
+
+class ViewValidationCurve(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                pads = axes.flatten()
+
+                target_variable_names = self.model._configuration['model']['target']
+                data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
+
+                # print(self.model.fit_results)
+
+                param_train_mean_score_dic = { key: [] for key in self.model.fit_results['params'][0].keys()}
+                param_test_mean_score_dic = { key: [] for key in self.model.fit_results['params'][0].keys()}
+                param_train_std_score_dic = { key: [] for key in self.model.fit_results['params'][0].keys()}
+                param_test_std_score_dic = { key: [] for key in self.model.fit_results['params'][0].keys()}
+                for el in range(0,len(self.model.fit_results['params'])):
+                        for key in self.model.fit_results['params'][el].keys():
+                                param_train_mean_score_dic[key].append([self.model.fit_results['params'][el][key],self.model.fit_results['mean_train_score'][el]])
+                                param_test_mean_score_dic[key].append([self.model.fit_results['params'][el][key],self.model.fit_results['mean_test_score'][el]])
+                                param_train_std_score_dic[key].append([self.model.fit_results['params'][el][key],self.model.fit_results['std_train_score'][el]])
+                                param_test_std_score_dic[key].append([self.model.fit_results['params'][el][key],self.model.fit_results['std_train_score'][el]])
+
+                for pad,param in enumerate(self.model._configuration[self.view_name]['parameters']):
+                        xcoords_train = np.array(param_train_mean_score_dic[param])[:,0]
+                        ycoords_train = np.array(param_train_mean_score_dic[param])[:,1]
+                        train_scores_std = np.array(param_train_std_score_dic[param])[:,1]
+                        xcoords_test = np.array(param_test_mean_score_dic[param])[:,0]
+                        ycoords_test = np.array(param_test_mean_score_dic[param])[:,1]
+                        test_scores_std = np.array(param_test_std_score_dic[param])[:,1]
+
+                        pads[pad].plot(xcoords_train, ycoords_train, label="Training score",
+                                color="darkorange", lw=2)
+                        pads[pad].fill_between(xcoords_train, ycoords_train - train_scores_std,
+                                        ycoords_train + train_scores_std, alpha=0.2,
+                                        color="darkorange", lw=2)
+                        pads[pad].plot(xcoords_test, ycoords_test, label="Cross-validation score",
+                                color="navy", lw=2)
+                        pads[pad].fill_between(xcoords_test, ycoords_test - test_scores_std,
+                                        ycoords_test + test_scores_std, alpha=0.2,
+                                        color="navy", lw=2)
+                        pads[pad].set_xlabel(param)
+                        pads[pad].set_ylabel('ROC AUC')
+                        pads[pad].legend(loc="best")
+
+                fig.tight_layout()
+                # plt.show()
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
+
+class ViewModelConfusionMatrixOvR(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                pads = axes.flatten()
+
+                target_variable_names = self.model._configuration['model']['target']
+                data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
+
+                input_features_names = self.model._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+                y_pred = self.model.my_model.predict(X_test)
+
+                class_names = self.model._configuration[self.view_name]['class_names']
+
+                # Plot (non-)normalized confusion matrix
+                from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+                cm = confusion_matrix(np.array(y_test).argmax(axis=1), np.array(y_pred).argmax(axis=1))
+                disp = ConfusionMatrixDisplay(cm,class_names)
+                disp.plot(cmap=plt.cm.Blues, ax=pads[0])
+                pads[0].set_title("Confusion matrix, without normalization")
+
+                # Plot normalized confusion matrix
+                cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+                disp = ConfusionMatrixDisplay(cm,class_names)
+                disp.plot(cmap=plt.cm.Blues, ax=pads[1])
+                pads[1].set_title("Normalized confusion matrix")
+
+                fig.tight_layout()
+                # plt.show()
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
+
+
 class ViewModelConfusionMatrix(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+                # fig, axes = plt.subplots()
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                pads = axes.flatten()
+
+                target_variable_names = self.model._configuration['model']['target']
+                data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
+
+                input_features_names = self.model._configuration['model']['input_features']
+                X_train = data_provider.train[input_features_names]
+                y_train = data_provider.train[target_variable_names]
+
+                X_test = data_provider.test[input_features_names]
+                y_test = data_provider.test[target_variable_names]
+                y_pred = self.model.my_model.predict(X_test)
+
+                class_names = self.model._configuration[self.view_name]['class_names']
+
+                # Plot (non-)normalized confusion matrix
+                from sklearn.metrics import plot_confusion_matrix
+                plot_confusion_matrix(self.model.my_model, X_test, y_test,
+                                        display_labels=class_names,
+                                        cmap=plt.cm.Blues,
+                                        normalize=None,
+                                        ax=pads[0])
+                pads[0].set_title("Confusion matrix, without normalization")
+
+                plot_confusion_matrix(self.model.my_model, X_test, y_test,
+                                        display_labels=class_names,
+                                        cmap=plt.cm.Blues,
+                                        normalize='true',
+                                        ax=pads[1])
+                pads[1].set_title("Normalized confusion matrix")
+
+                fig.tight_layout()
+                # plt.show()
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                for name in self.get_outfile_name(): plt.savefig(name)
+                plt.close(fig)
+
+
+class ViewModelConfusionMatrix_old(View):
         @log_with()
         def __init__(self,view_name=None):
                 self.view_name = view_name
@@ -766,11 +1141,11 @@ class ViewModelConfusionMatrix(View):
                 # classes = classes[unique_labels(y_test, y_pred)]
                 if normalize:
                         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-                        print("Normalized confusion matrix")
+                        # print("Normalized confusion matrix")
                 else:
-                        print('Confusion matrix, without normalization')
-
-                print(cm)
+                        # print('Confusion matrix, without normalization')
+                        pass
+                # print(cm)
 
                 im = axes.imshow(cm, interpolation='nearest', cmap=cmap)
                 axes.figure.colorbar(im, ax=axes)
@@ -813,6 +1188,85 @@ class ViewModelConfusionMatrix(View):
                 self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
                 for name in self.get_outfile_name(): plt.savefig(name)
                 plt.close(fig)
+
+class ViewClientsRank(View):
+        @log_with()
+        def __init__(self,view_name=None):
+                self.view_name = view_name
+                pass
+        
+        def offer_class(self):
+                pass
+
+        def max_argmax_class(self,a):
+                #0->MF,1->CC,2->CL
+                index_class_dic = {0:1,1:2,2:3}
+                argmax = np.argmax(a)
+                return [a[argmax],index_class_dic[argmax]]
+
+        @log_with()
+        def draw(self):
+                if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+                
+                data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
+                X = data_provider.data
+                input_features_reg_MF = self.model._configuration['model']['input_features_reg_MF']
+                X_reg_MF = X[input_features_reg_MF]
+                input_features_reg_CC = self.model._configuration['model']['input_features_reg_CC']
+                X_reg_CC = X[input_features_reg_CC]
+                input_features_reg_CL = self.model._configuration['model']['input_features_reg_CL']
+                X_reg_CL = X[input_features_reg_CL]
+                input_features_multiclass = self.model._configuration['model']['input_features_multiclass']
+                X_multiclass = X[input_features_multiclass]
+
+                y_prob = self.model.my_multiclassification.predict_proba(X_multiclass)
+                revenue_MF = self.model.my_revenue_mf.predict(X_reg_MF)
+                revenue_CC = self.model.my_revenue_cc.predict(X_reg_CC)
+                revenue_CL = self.model.my_revenue_cl.predict(X_reg_CL)
+                # max revenue among different classes
+                Mix= np.array( [self.max_argmax_class([revenue_MF[entry],revenue_CC[entry],revenue_CL[entry]]) for entry in range(0,len(X))] )
+                revenue_mix = np.array(Mix[:,0])
+                Mix_class = np.array(Mix[:,1])
+
+                exp_revenue_MF = y_prob[:,1]*revenue_MF
+                exp_revenue_CC = y_prob[:,2]*revenue_CC
+                exp_revenue_CL = y_prob[:,3]*revenue_CL
+                exp_revenue_mix = y_prob[:,4]*revenue_mix
+
+                exp_revenue = np.array([exp_revenue_MF,exp_revenue_CC,exp_revenue_CL,exp_revenue_mix]).transpose()
+                offer_class = np.array([[1]*len(X),[2]*len(X),[3]*len(X),Mix_class]).transpose()
+                best_offer_class = np.array( [offer_class[entry,np.argmax(exp_revenue[entry])] for entry in range (0,len(X))] )
+                best_offer_revenue = np.array( [exp_revenue[entry,np.argmax(exp_revenue[entry])] for entry in range (0,len(X))] )
+
+                # print (exp_revenue)
+                # print (offer_class)
+                # print (best_offer_class)
+                # print (Mix)
+                # print (Mix[:,1])
+
+                # print (y_prob)
+                probs = pd.DataFrame(y_prob,columns=['Prob_Rej','Prob_MF','Prob_CC','Prob_CL','Prob_Mix'],index=X.index)
+                revs  = pd.DataFrame({'Rev_MF':revenue_MF,'Rev_CC':revenue_CC,'Rev_CL':revenue_CL,'Rev_mix':revenue_mix,
+                                      'ExpRev_MF':exp_revenue_MF,'ExpRev_CC':exp_revenue_CC,'ExpRev_CL':exp_revenue_CL,'ExpRev_mix':exp_revenue_mix,
+                                      'MixOfferClass':Mix_class, 'BestOfferClass':best_offer_class,'BestOfferRevenue':best_offer_revenue},
+                                      index=X.index)
+                probs_revs = pd.merge(probs,revs, left_index=True, right_index=True)
+
+                print (probs_revs.head())
+
+                rank = probs_revs[['BestOfferClass','BestOfferRevenue']].sort_values('BestOfferRevenue', ascending=False)
+                top_quant_15 = int(0.15*len(rank))
+                print('N rows for top 15% = {}'.format(top_quant_15))
+                exp_rev_top_quatn_15 = np.sum(rank['BestOfferRevenue'].head(top_quant_15))
+                print('=================')
+                print('Expected revenue for top 15%: {}',format(exp_rev_top_quatn_15))
+                print('=================')
+
+
+                self.set_outfilename(self.model._configuration[self.view_name]['output_filename'])
+                rank.to_csv(self.get_single_outfile_name())
+
+                pass
 
 class ViewModelClassificationLearningCurve(View):
         @log_with()
@@ -908,9 +1362,9 @@ class LatexBeamerView(View):
                 if type == "screen":
                         bright_green_text = "\033[1;32;40m"
                         normal_text = "\033[0;37;40m"
-                        print("\n".join(textwrap.wrap(f"bcolors.OKBLUE"+
+                        print("\n".join(textwrap.wrap(f"{bcolors.OKBLUE}"+
                                                 self.model._annotation+
-                                                f"bcolors.ENDC", 120)))
+                                                f"{bcolors.ENDC}", 120)))
                 elif type == "tex":
                         logging.warning("Annotation format: {}. Not implemented yet!".format(type))
                 elif type == "md":

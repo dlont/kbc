@@ -2,33 +2,42 @@ from numpy import linspace
 config={
   'annotation': 'Modelling data distributions.',
   'compatibility_version':'1.6pre',
-  'command': 'bin/kbc_direct_marketing_mock.py -c configs/conf_baseline_noOutliers_Multiclass_MLP_cff.py',
+  'command': 'bin/kbc_direct_marketing_mock.py -c configs/conf_baseline_noOutliers_Multiclass_cff.py',
   'latex_main': 'latex/report.tex',
   'model':{
-   'type':'advanced_classification_mlp',
-   'output_filename':'build/Multiclassification_MLP.pkl',
+   'type':'advanced_classification_rf',
+   'output_filename':'build/Multiclassification5_RF.pkl',
    'data_provider':'model_data_provider',
    'do_training':True,
-   'input_features':['Sex', 'Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'TransactionsCred', 'TransactionsCred_CA', 'VolumeDeb', 'VolumeDeb_CA', 'VolumeDebCash_Card', 'VolumeDebCashless_Card', 'VolumeDeb_PaymentOrder', 'TransactionsDeb', 'TransactionsDeb_CA', 'TransactionsDebCash_Card', 'TransactionsDebCashless_Card', 'TransactionsDeb_PaymentOrder', 'Count_CA', 'Count_SA', 'Count_MF', 'Count_OVD', 'Count_CC', 'Count_CL', 'ActBal_CA', 'ActBal_SA', 'ActBal_MF', 'ActBal_OVD', 'ActBal_CC', 'ActBal_CL'],
-#    'target':['Sale_Multiclass'],
-   'target':[0,1,2,3,4],
-   'alpha':[0.0001,0.1,10.],
-   # 'alpha':[0.1],
-   # 'hidden_layer_sizes':[(5, )],
-   'hidden_layer_sizes':[(100),(5,5),(30,30),(100,100)],
-   'activation':'relu',
-   'max_iter':[1000,5000,10000]
-   # 'max_iter':[1000,5000,10000,50000]
-   # 'activation':'logistic',
-   # 'max_iter':[5,10,20,30,50,500,1000,5000]
+#    'input_features':['Sex', 'Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'TransactionsCred', 'TransactionsCred_CA', 'VolumeDeb', 'VolumeDeb_CA', 'VolumeDebCash_Card', 'VolumeDebCashless_Card', 'VolumeDeb_PaymentOrder', 'TransactionsDeb', 'TransactionsDeb_CA', 'TransactionsDebCash_Card', 'TransactionsDebCashless_Card', 'TransactionsDeb_PaymentOrder', 'Count_CA', 'Count_SA', 'Count_MF', 'Count_OVD', 'Count_CC', 'Count_CL', 'ActBal_CA', 'ActBal_SA', 'ActBal_MF', 'ActBal_OVD', 'ActBal_CC', 'ActBal_CL'],
+   'input_features':['Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'VolumeDeb', 'ActBal_CA', 'ActBal_SA'],
+   'target':['Sale_Multiclass'],
+   'n_estimators':[100,500,1000,5000],
+   'max_depth':[5,7],
+   'criterion':'gini',
+   'class_weight':'balanced',
+   'min_samples_leaf':[20]
   },
   'mode': 'report',
-#   'views':['learning_curve','output_classifier','prob_correlations','confusion_matrix'],
-#   'views':['output_classifier','prob_correlations','confusion_matrix'],
-  'views':['confusion_matrix','ROC'],
+#   'views':['prob_correlations','confusion_matrix','output_classifier','ROC'],
+  'views':['prob_correlations','confusion_matrix','output_classifier','importance','ROC'],
+  'importance':{
+     'annotation': 'RF_feature_improtance',
+     'type':'rf_feature_importance',
+     'output_filename':'rf_feature_importance',
+     'size': [8.5,5.0],
+  },
+  'ROC':{
+     'annotation': 'ROC Random Forest',
+     'type':'multiclassification_roc',
+     'output_filename':'Sale_multiclass_roc',
+     'layout':{'nrows':1, 'ncols':2},
+     'size': [8.5,5.0],
+     'class_names':['0','1','2','3','4']
+  },
   'learning_curve':{
-     'annotation': 'Learning curve MLP',
-     'type':'multiclassification_learning_curve_mlp',
+     'annotation': 'Learning curve Random Forest',
+     'type':'multiclassification_learning_curve',
      'output_filename':'Sale_multiclass_learning_curve',
      'layout':{'nrows':1, 'ncols':2},
      'size': [8.5,2.5],
@@ -55,19 +64,10 @@ config={
      'class1_label_train':'Train',
      'class1_label_test':'Test',
   },
-  'ROC':{
-     'annotation': 'ROC MLP',
-     'type':'multiclassification_roc',
-     'output_filename':'Sale_multiclass_roc',
-     'layout':{'nrows':1, 'ncols':2},
-     'size': [12.5,5.0],
-     'class_names':['0','1','2','3','4'],
-     'metrics':['individual','average'],
-  },
   'confusion_matrix':{
      'annotation': 'Classifier confusion matrix',
-     'type':'multiclassification_ovr_confusion_matrix',
-     'output_filename':'multiclassification_ovr_confusion_matrix',
+     'type':'multiclassification_confusion_matrix',
+     'output_filename':'multiclass_confusion_matrix',
      'layout':{'nrows':1, 'ncols':2},
      'size': [8.5,5.0],
      'class_names':['0','1','2','3','4']
@@ -184,7 +184,7 @@ config={
 
   'model_data_provider':{
         'type':'PandasDataProviderRespondingClientsNoOutliers',
-        'remove_all':True,        
+        'remove_all':True,
         'training_set':True,
         'input_file':'data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv'
   }

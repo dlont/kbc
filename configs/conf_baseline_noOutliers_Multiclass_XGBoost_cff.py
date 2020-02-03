@@ -16,7 +16,13 @@ config={
    'objective':'multi:softprob',
   },
   'mode': 'report',
-  'views':['learning_curve','output_classifier','prob_correlations','confusion_matrix'],
+  'views':['learning_curve','output_classifier','prob_correlations','confusion_matrix','importance'],
+  'importance':{
+     'annotation': 'RF_feature_improtance',
+     'type':'rf_feature_importance',
+     'output_filename':'rf_feature_importance',
+     'size': [8.5,5.0],
+  },
   'learning_curve':{
      'annotation': 'Learning curve XGBoost',
      'type':'multiclassification_learning_curve',

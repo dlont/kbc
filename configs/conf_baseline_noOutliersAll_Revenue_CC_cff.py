@@ -6,6 +6,7 @@ config={
   'latex_main': 'latex/report.tex',
   'model':{
    'type':'advanced_regression',
+   'output_filename':'build/Revenue_CC_regression.pkl',
    'data_provider':'model_data_provider',
    'input_features':['Sex', 'Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'TransactionsCred', 'TransactionsCred_CA', 'VolumeDeb', 'VolumeDeb_CA', 'VolumeDebCash_Card', 'VolumeDebCashless_Card', 'VolumeDeb_PaymentOrder', 'TransactionsDeb', 'TransactionsDeb_CA', 'TransactionsDebCash_Card', 'TransactionsDebCashless_Card', 'TransactionsDeb_PaymentOrder', 'Count_CA', 'Count_SA', 'Count_MF', 'Count_OVD', 'Count_CC', 'Count_CL', 'ActBal_CA', 'ActBal_SA', 'ActBal_MF', 'ActBal_OVD', 'ActBal_CC', 'ActBal_CL'],
    'target':['Revenue_CC'],
@@ -14,12 +15,12 @@ config={
    'learning_rate':0.01,
   },
   'mode': 'report',
-  'views':['features_1d_Soc_Dem_p1','features_1d_Inflow_Outflow_p1','features_1d_Inflow_Outflow_p2',
-           'features_1d_Products_ActBalance_p1','features_1d_Products_ActBalance_p2',
-           'features_1d_Targets_p1','features_2d_Targets_correlations_p1','features_2d_Targets_Inputs_correlations_p1',
-           'features_2d_Targets_Inputs_correlations_p2','features_2d_Targets_Inputs_correlations_p3',
-           'features_2d_Targets_Inputs_correlations_p4','learning_curve'],
-  'learning_curve':{
+  'views':['features_RevCC_1d_Soc_Dem_p1','features_RevCC_1d_Inflow_Outflow_p1','features_RevCC_1d_Inflow_Outflow_p2',
+           'features_RevCC_1d_Products_ActBalance_p1','features_RevCC_1d_Products_ActBalance_p2',
+           'features_RevCC_1d_Targets_p1','features_RevCC_2d_Targets_correlations_p1','features_RevCC_2d_Targets_Inputs_correlations_p1',
+           'features_RevCC_2d_Targets_Inputs_correlations_p2','features_RevCC_2d_Targets_Inputs_correlations_p3',
+           'features_RevCC_2d_Targets_Inputs_correlations_p4','Rec_CC_learning_curve'],
+  'Rec_CC_learning_curve':{
      'annotation': 'Learning curve XGBoost',
      'type':'regression_model_learning_curve',
      'output_filename':'Revenue_CC_learning_curve',
@@ -27,94 +28,94 @@ config={
      'size': [8.5,2.5],
      'metrics':['rmse','mae']
   },
-  'features_1d_Soc_Dem_p1':{
+  'features_RevCC_1d_Soc_Dem_p1':{
      'annotation': 'Age, Sex, Tenure train/test distributions p1.',
      'type':'1d_train_test',
-     'output_filename':'features_1d_Soc_Dem_p1',
+     'output_filename':'features_RevCC_1d_Soc_Dem_p1',
      'layout':{'nrows':1, 'ncols':3},
      'size': [8.5,2.5],
      'features':['Sex','Age','Tenure']
   },
-  'features_1d_Inflow_Outflow_p1':{
+  'features_RevCC_1d_Inflow_Outflow_p1':{
      'annotation': 'Inflow/Outflow distribution p1.',
      'type':'1d_train_test',
-     'output_filename':'features_1d_Inflow_Outflow_p1',
+     'output_filename':'features_RevCC_1d_Inflow_Outflow_p1',
      'layout':{'nrows':2, 'ncols':4},
      'size': [8.5,5.0],
      'features':['VolumeCred','VolumeCred_CA','TransactionsCred','TransactionsCred_CA','VolumeDeb','VolumeDeb_CA','VolumeDebCash_Card']
   },
-  'features_1d_Inflow_Outflow_p2':{
+  'features_RevCC_1d_Inflow_Outflow_p2':{
      'annotation': 'Inflow/Outflow distribution p2.',
      'type':'1d_train_test',
-     'output_filename':'features_1d_Inflow_Outflow_p2',
+     'output_filename':'features_RevCC_1d_Inflow_Outflow_p2',
      'layout':{'nrows':2, 'ncols':4},
      'size': [8.5,5.0],
      'features':['VolumeDebCashless_Card','VolumeDeb_PaymentOrder','TransactionsDeb','TransactionsDeb_CA','TransactionsDebCash_Card','TransactionsDebCashless_Card','TransactionsDeb_PaymentOrder']
   },
-  'features_1d_Products_ActBalance_p1':{
+  'features_RevCC_1d_Products_ActBalance_p1':{
      'annotation': 'Products account balance after imputation distributions p1.',
      'type':'1d_train_test',
-     'output_filename':'features_1d_Products_ActBalance_p1',
+     'output_filename':'features_RevCC_1d_Products_ActBalance_p1',
      'layout':{'nrows':2, 'ncols':3},
      'size': [8.5,5.0],
      'features':['Count_CA','Count_SA','Count_MF','ActBal_CA','ActBal_SA','ActBal_MF']
   },
-  'features_1d_Products_ActBalance_p2':{
+  'features_RevCC_1d_Products_ActBalance_p2':{
      'annotation': 'Products account balance after imputation distributions p2.',
      'type':'1d_train_test',
-     'output_filename':'features_1d_Products_ActBalance_p2',
+     'output_filename':'features_RevCC_1d_Products_ActBalance_p2',
      'layout':{'nrows':2, 'ncols':3},
      'size': [8.5,5.0],
      'features':['Count_OVD','Count_CC','Count_CL','ActBal_OVD','ActBal_CC','ActBal_CL']
   },
-  'features_1d_Targets_p1':{
+  'features_RevCC_1d_Targets_p1':{
      'annotation': 'Sales and revenues p1.',
      'type':'1d_train_test',
-     'output_filename':'features_1d_Targets_p1',
+     'output_filename':'features_RevCC_1d_Targets_p1',
      'layout':{'nrows':2, 'ncols':3},
      'size': [8.5,5.0],
      'features':['Sale_MF','Sale_CC','Sale_CL','Revenue_MF','Revenue_CC','Revenue_CL']
   },
-  'features_2d_Targets_Inputs_correlations_p1':{
+  'features_RevCC_2d_Targets_Inputs_correlations_p1':{
      'annotation': 'Revenue CC VS inputs correlations p1.',
      'type':'2d_train_correlations',
-     'output_filename':'features_2d_Targets_Inputs_correlations_p1',
+     'output_filename':'features_RevCC_2d_Targets_Inputs_correlations_p1',
      'layout':{'nrows':1, 'ncols':2},
      'size': [8.5,5.0],
      'features':[['Revenue_CC','Age'], ['Revenue_CC','Tenure']]
   },
-  'features_2d_Targets_Inputs_correlations_p2':{
+  'features_RevCC_2d_Targets_Inputs_correlations_p2':{
      'annotation': 'Revenue CC VS inputs correlations p2.',
      'type':'2d_train_correlations',
-     'output_filename':'features_2d_Targets_Inputs_correlations_p2',
+     'output_filename':'features_RevCC_2d_Targets_Inputs_correlations_p2',
      'layout':{'nrows':2, 'ncols':3},
      'size': [8.5,5.0],
      'features':[['Revenue_CC','VolumeCred'],['Revenue_CC','VolumeCred_CA'],
                  ['Revenue_CC','TransactionsCred'], ['Revenue_CC','TransactionsCred_CA'],
                  ['Revenue_CC','VolumeDeb'], ['Revenue_CC','VolumeDeb_CA']]
   },
-  'features_2d_Targets_Inputs_correlations_p3':{
+  'features_RevCC_2d_Targets_Inputs_correlations_p3':{
      'annotation': 'Revenue CC VS inputs correlations p3.',
      'type':'2d_train_correlations',
-     'output_filename':'features_2d_Targets_Inputs_correlations_p3',
+     'output_filename':'features_RevCC_2d_Targets_Inputs_correlations_p3',
      'layout':{'nrows':2, 'ncols':3},
      'size': [8.5,5.0],
      'features':[['Revenue_CC','VolumeDebCash_Card'], ['Revenue_CC','VolumeDebCashless_Card'], 
                  ['Revenue_CC','VolumeDeb_PaymentOrder'], ['Revenue_CC','TransactionsDebCash_Card'],
                  ['Revenue_CC','TransactionsDebCashless_Card'], ['Revenue_CC','TransactionsDeb_PaymentOrder']]
   },
-  'features_2d_Targets_Inputs_correlations_p4':{
+  'features_RevCC_2d_Targets_Inputs_correlations_p4':{
      'annotation': 'Revenue CC VS inputs correlations p4.',
      'type':'2d_train_correlations',
-     'output_filename':'features_2d_Targets_Inputs_correlations_p4',
+     'output_filename':'features_RevCC_2d_Targets_Inputs_correlations_p4',
      'layout':{'nrows':1, 'ncols':2},
      'size': [8.5,5.0],
      'features':[['Revenue_CC','TransactionsDeb'], ['Revenue_CC','TransactionsDeb_CA']]
   },
-  'features_2d_Targets_correlations_p1':{
+  'features_RevCC_2d_Targets_correlations_p1':{
      'annotation': 'Revenue CC VS targets correlations p1.',
      'type':'2d_train_correlations',
-     'output_filename':'features_2d_Targets_correlations_p1',
+     'output_filename':'features_RevCC_2d_Targets_correlations_p1',
      'layout':{'nrows':1, 'ncols':3},
      'size': [8.5,5.0],
      'features':[['Revenue_CC','Revenue_MF'],['Revenue_CC','Revenue_CL'],['Revenue_CL','Revenue_MF']]
@@ -1041,6 +1042,7 @@ config={
   'model_data_provider':{
         'type':'PandasDataProviderRespondingClientsNoOutliersRevenueCC',
         'remove_all':True,
+        'training_set':True,
         'input_file':'data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv'
   }
  }

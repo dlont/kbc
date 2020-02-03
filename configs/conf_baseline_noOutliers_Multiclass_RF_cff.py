@@ -14,10 +14,17 @@ config={
    'max_depth':5,
    'criterion':'gini',
    'class_weight':'balanced',
+   'min_samples_leaf':10
   },
   'mode': 'report',
 #   'views':['prob_correlations','confusion_matrix','output_classifier','ROC'],
-  'views':['prob_correlations','confusion_matrix','output_classifier'],
+  'views':['prob_correlations','confusion_matrix','output_classifier','importance'],
+  'importance':{
+     'annotation': 'RF_feature_improtance',
+     'type':'rf_feature_importance',
+     'output_filename':'rf_feature_importance',
+     'size': [8.5,5.0],
+  },
   'ROC':{
      'annotation': 'ROC Random Forest',
      'type':'multiclassification_roc',

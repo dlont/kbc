@@ -112,7 +112,9 @@ def main(arguments):
             elif configuration['model']['type'] == 'advanced_classification_svc': model = AdvancedModelClassificationSVC(configuration)
             elif configuration['model']['type'] == 'advanced_classification_mlp': model = AdvancedModelClassificationMLP(configuration)
             elif configuration['model']['type'] == 'advanced_classification_rf': model = AdvancedModelClassificationRF(configuration)
+            elif configuration['model']['type'] == 'advanced_classification_ovr_rf': model = AdvancedModelClassificationOvRRF(configuration)
             elif configuration['model']['type'] == 'advanced_regression': model = AdvancedModelRegression(configuration)
+            elif configuration['model']['type'] == 'predictor': model = PredictionModel(configuration)
             else: raise NotImplementedError
             
             style = Style(configuration,model)
@@ -152,10 +154,22 @@ def main(arguments):
                             view = ViewModelMulticlassClassificationDistributions(view_name)
                     elif configuration[view_name]['type'] == 'multiclassification_prob_correlations':
                             view = ViewModelMulticlassProbabilityCorrelations(view_name)
+                    elif configuration[view_name]['type'] == 'multiclassification_ovr_prob_correlations':
+                            view = ViewModelMulticlassOvRProbabilityCorrelations(view_name)
                     elif configuration[view_name]['type'] == 'multiclassification_confusion_matrix':
                             view = ViewModelConfusionMatrix(view_name)
+                    elif configuration[view_name]['type'] == 'multiclassification_ovr_confusion_matrix':
+                            view = ViewModelConfusionMatrixOvR(view_name)
+                    elif configuration[view_name]['type'] == 'rf_feature_importance':
+                            view = ViewRFModelFeatureImprotance(view_name)
+                    elif configuration[view_name]['type'] == 'rf_ovr_feature_importance':
+                            view = ViewRFModelFeatureImprotanceOvR(view_name)
                     elif configuration[view_name]['type'] == 'multiclassification_roc':
                             view = ViewModelROC(view_name)
+                    elif configuration[view_name]['type'] == 'validation_curve':
+                            view = ViewValidationCurve(view_name)
+                    elif configuration[view_name]['type'] == 'clients_rank':
+                            view = ViewClientsRank(view_name)
                     else: view = View(view_name)
                     view.set_model(model)
                     view.set_style(style)
