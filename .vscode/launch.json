@@ -8,10 +8,10 @@
             "name": "Python: KBC main",
             "type": "python",
             "pythonPath": "/usr/bin/python",
-            "envFile": "${workspaceFolder}/.vscode/python.env",
+            "envFile": "${workspaceFolder}/.vscode/python_mac.env",
             "request": "launch",
             "program": "${workspaceFolder}/source/kbc_direct_marketing_mock.py",
-            "args" : ["-b", "-c", "configs/conf_baseline_noOutliers_Multiclass_RF_cff.py", "--dir=results"],
+            "args" : ["-b", "-c", "configs/conf_baseline_noOutliersAll_Revenue_CC_cff.py", "--dir=results"],
             "console": "integratedTerminal"
         }
     ]
