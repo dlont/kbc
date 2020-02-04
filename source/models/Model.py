@@ -857,13 +857,14 @@ class VanillaModelClassification(Model):
                 self._annotation = 'Performance comparision of different MVA discriminants'
                 if 'annotation' in self._configuration:
                         self._annotation = self._configuration['annotation']
+                self.do_training = self._configuration['model'].get('do_training',False)
                 self.my_model = None
                 self.fit_results = None
                 self.Initialize()
 
         @log_with()
         def Initialize(self):
-                self.build_best_prediction()
+                if self.do_training: self.build_best_prediction()
                 pass
 
         @log_with()
@@ -887,7 +888,15 @@ class VanillaModelClassification(Model):
                         return self._objects[provider_name]
                 else:
                         if '.csv' in self._configuration[provider_name]['input_file']:
-                                provider = PandasDataProviderFromCSV_original(self._configuration[provider_name]['input_file'])
+                                if self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClients': 
+                                        raise NotImplementedError
+                                elif self._configuration[provider_name]['type'] =='PandasDataProviderRespondingClientsNoOutliers': 
+                                        provider = PandasDataProviderRespondingClientsNoOutliers(self._configuration[provider_name]['input_file'],
+                                        remove_all=self._configuration[provider_name]['remove_all'],training_set=self._configuration[provider_name]['training_set'])
+                                elif self._configuration[provider_name]['type'] =='PandasDataProviderFromCSV_TrainPredictionDatasetsForInclusive':
+                                        provider = PandasDataProviderFromCSV_TrainPredictionDatasetsForInclusive(self._configuration[provider_name]['input_file'])
+                                else:
+                                        provider = PandasDataProviderFromCSV_original(self._configuration[provider_name]['input_file'])
                                 self._objects[provider_name] = provider
                         else: raise NotImplementedError
                 return self._objects[provider_name]

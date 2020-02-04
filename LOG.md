@@ -299,9 +299,105 @@ df['Sale_multiclass'].value_counts()
  3    177
 ```
 
+# 02.02.2020 00.40
+## Wrong multiclass encoding
+
+Initially I got wrong encoding of all possiblities for Sale_MF, Sale_CC and Sale_CL variables. I have corrected this with the new encoding fuction.
+```python
+def binary_enconding(el):
+            '''
+            Improved encoding of all possible Sale_MF,Sale_CC,Sale_CL options
+            '''
+            import numpy as np
+            result = -1
+            if el['Sale_MF'] == -1 or el['Sale_CC']==-1 or el['Sale_CL']==-1: result = -1
+            else: result = el['Sale_MF']*4 + el['Sale_CC']*2 + el['Sale_CL']
+            return result
+
+import pandas as pd
+import numpy as np
+df = pd.read_csv('data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv', index_col='Client')
+df['Sale_multiclass'] = df[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:binary_enconding(el),axis=1)
+df['Sale_multiclass'].value_counts()
+-1.0    635
+ 0.0    387
+ 1.0    177
+ 2.0    137
+ 4.0    106
+ 3.0     55
+ 5.0     42
+ 6.0     31
+ 7.0     14
+Name: Sale_Multiclass, dtype: int64
+```
+
+```python
+
+def reduced_binary_coding(el):
+     '''
+     Improved coding of all possible Sale_MF,Sale_CC,Sale_CL options.
+     Lumping all cases with two or more Sale_ variables equal into single label.
+     Possible lable values are [-1,0,1,2,3,4] or [0,1,2,3,4], when pred class is excluded.
+     0 -> Reject
+     1 -> Sale_MF=1
+     2 -> Sale_CC=1
+     3 -> Sale_CL=1
+     4 -> Two or more Sale_* variables =1
+     '''
+     import numpy as np
+     result = -1
+     if el['Sale_MF'] == -1 or el['Sale_CC']== -1 or el['Sale_CL']== -1: result = -1
+     elif el['Sale_MF'] == 0 and el['Sale_CC'] == 0 and el['Sale_CL'] == 0: result = 0
+     elif el['Sale_MF'] == 1 and el['Sale_CC'] == 0 and el['Sale_CL'] == 0: result = 1
+     elif el['Sale_MF'] == 0 and el['Sale_CC'] == 1 and el['Sale_CL'] == 0: result = 2
+     elif el['Sale_MF'] == 0 and el['Sale_CC'] == 0 and el['Sale_CL'] == 1: result = 3
+     else: result = 4
+     return result
+
+def reduced_binary_encoding_weight(el):
+            my_weights = {-1:1.0,0:1./0.40, 1:1./0.11, 2:1./0.14, 3:1./0.19, 4:1./0.149}
+            return my_weights[el]
+
+import pandas as pd
+import numpy as np
+df = pd.read_csv('data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv', index_col='Client')
+df['Sale_multiclass'] = df[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:reduced_binary_coding(el),axis=1)
+df['Sale_multiclass'].value_counts()
+
+df['weights'] = df['Sale_multiclass'].apply(reduced_binary_encoding_weight)
+
+def ordinal_enconding(el):
+     '''
+     This is very bad encoding resulting in overlaping classes. DO NOT USE!
+     '''
+     import numpy as np
+     result = -1
+     if el['Sale_MF']==1: result = 1
+     elif el['Sale_CC']==1: result = 2
+     elif el['Sale_CL']==1: result = 3
+     elif el['Sale_MF'] == 0 and el['Sale_CC']==0 and el['Sale_CL']==0: result = 0
+     elif el['Sale_MF'] == -1 or el['Sale_CC']==-1 or el['Sale_CL']==-1: result = -1
+     else: result = np.nan
+     return result
+
+df['Sale_multiclass'] = df[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:reduced_binary_coding(el),axis=1)
+
+```
+
 ----------------------------
 ----------------------------
 # Miscellaneous 
+## Expected revenue calculation
+```python
+import numpy as np
+prob = np.array([0.2,0.5,0.1,0.2])
+rev  = np.array([100,1000,10000,np.max([100,1000,10000])])
+exp_rev = prob*rev
+best_offer = np.argmax(exp_rev)
+print("Best offer (class, revenue): {} {}".format(best_offer,exp_rev[best_offer]))
+```
+
+
 ## Transformations to the original datasets 
 
 ```python

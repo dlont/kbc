@@ -303,8 +303,8 @@ class View1dTrainTest(View):
                 hist_testing = np.histogram(class1_testing, bins)
                 if any([underflow, overflow]):
                         hist_testing = np.histogram(np.clip(class1_testing, bins[0] if underflow else None, bins[-1] if overflow else None), bins)
-                points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0]))
-                points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/float(np.sum(hist_testing[0]))
+                points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0])) if np.sum(hist_testing[0])>0 else hist_testing[0]
+                points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/float(np.sum(hist_testing[0])) if np.sum(hist_testing[0])>0 else np.sqrt(hist_testing[0])
                 ax.errorbar(bin_centers, points_testing_y, yerr=points_testing_yerr, marker=self.model._configuration[feature_name]['class1_marker_test'], 
                                 ls=self.model._configuration[feature_name]['class1_line_test'], color=self.model._configuration[feature_name]['class1_color_test'], 
                                 label=self.model._configuration[feature_name]['class1_label_test'])
@@ -326,8 +326,8 @@ class View1dTrainTest(View):
                 hist_testing = np.histogram(class2_testing, bins)
                 if any([underflow, overflow]):
                         hist_testing = np.histogram(np.clip(class2_testing, bins[0] if underflow else None, bins[-1] if overflow else None), bins)
-                points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0]))
-                points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/np.sum(hist_testing[0])
+                points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0])) if np.sum(hist_testing[0])>0 else hist_testing[0]
+                points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/np.sum(hist_testing[0]) if np.sum(hist_testing[0])>0 else np.sqrt(hist_testing[0])
                 ax.errorbar(bin_centers, points_testing_y, yerr=points_testing_yerr, marker=self.model._configuration[feature_name]['class2_marker_test'], 
                                 ls=self.model._configuration[feature_name]['class2_line_test'], color=self.model._configuration[feature_name]['class2_color_test'], 
                                 label=self.model._configuration[feature_name]['class2_label_test'])
