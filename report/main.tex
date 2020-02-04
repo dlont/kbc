@@ -32,12 +32,13 @@ Technical report with the outline of the task solution.
 \end{abstract}
 \section{Introduction.}
 This document describes the proposed solution for the optimization of the marketing
-campaign. In the Section~\ref{sec:math}, mathematical formulation for the estimation of the
-expected revenue of the campaign is given. The Sec.~\ref{sec:data} outlines basic 
-information about input dataset. The Sections~\ref{sec:mva_classifier},~\ref{sec:mva_regression}
+campaign. In Section~\ref{sec:math}, mathematical formulation for the estimation of the
+expected revenue of the campaign is given. Sec.~\ref{sec:data} outlines basic 
+information about input dataset. Sections~\ref{sec:mva_classifier},~\ref{sec:mva_regression}
 contain the details of the multivariate analysis.
 \section{Mathematical model for the expected revenue.}\label{sec:math}
-To calculate the expected revenue of the direct marketing campaign, the following simplified ansatz is used:
+To calculate the expected revenue of the direct marketing campaign, the following
+simplified ansatz is used:
 \begin{equation}
     \textmd{E}\left[R_a\right] =  \int d\mathbf{x}\,R_a \left( \textbf{x}|\textrm{respond} \right) \pi_{a}\left(\textrm{respond}|\textbf{x}\right) + 
                                                     R_a(\textbf{x}|\textrm{not respond}) \left(1 - \pi_{a}\left(\textrm{respond}|\textbf{x}\right) \right),
@@ -80,43 +81,46 @@ expected revenues from individual classes
 \end{equation}
 
 In order to optimize the revenue of the campaign, the clients that provide the largest
-contribution to the sum have to be identified. The following sections outline main 
+contribution to the sum have to be identified. Following sections outline main 
 steps to achieve this task.
 
 \section{Data.}\label{sec:data}
 The data were provided in the form of the .xslx spreadsheet with several tables.
 In order to facilitate further processing, the file was converted to .csv format
 and processed with dedicated scripts developed for this analysis.
-The scripts utilise standard in the field data processing and machine learning 
+The scripts utilize standard for the field data processing and machine learning 
 libraries \textbf{\textsl{pandas}} and \textbf{\textsl{scikit-learn}}.
 
-The input tables contained entries corresponding to the clients that responded to 
+The input tables contained records corresponding to the clients that responded to 
 different classes (Mutual fund (MF), Credit Card (CC), Consumer Loan (CL)) of 
 marketing advertisement and the information about their profile, such as 
-socio-demographic status and financial activity. For a fraction of the clients 
+socio-demographic status and financial activity. For a fraction of clients, 
 for which the information about the success of the targeting is not available, the
-probability of the positive outcome has to be predicted. It is important to ensure
+probability of the positive outcome has to be predicted. 
+
+It is important to ensure
 that the data in two subsets is drawn from the same population. Otherwise, the
 developed propensity model will give biased results.
-
 The example plots (see Fig.~\ref{fig:inclus_features_1d_Soc_Dem_p1}) below demonstrate 
 distributions of the parameters 
-(components of the n-dimentional vectors $\textbf{x}_i$) characterizing the clients.
+(components of the n-dimensional vectors $\textbf{x}_i$) characterizing the clients.
 Remaining plots for all distributions can be found in the Appendix~\ref{app:additional}.
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{../results/IntegralPlots/features_1d_Soc_Dem_p1}\\
-    \caption{Normalized distributions of the client's feature variables for the subsests of the
+    \caption{Normalized distributions of the client's feature variables for the
+    subsets of the
     data with known (Train) and unknown (Predict) target variables. Last bin contains
     overflow entries.}
     \label{fig:inclus_features_1d_Soc_Dem_p1}
 \end{figure}
-As can be seen from the plots, the data in the training and prediction subsets follow
-the same probability distribution within the statistical uncertainties of the datasets.
+As can be seen from the plots, within statistical uncertainties of the datasets
+the data in the training and prediction subsets follow the same probability
+distributions.
 
 Majority of the clients did not accept the offer or responded only to one type of 
 the advertisement (see Tab.~\ref{tab:clients_per_class}), therefore it was decided to 
 label each client according to the type of the advertisement that was successful.
-These classes are mutully exclusive.
+These classes are mutually exclusive.
 
 \begin{table}[htpb!]
     \centering
@@ -137,38 +141,40 @@ These classes are mutully exclusive.
 \section{Propensity model for different classes.}\label{sec:mva_classifier}
 \subsection{Classification algorithm.}
 Several multivariate techniques were tried in order to build the propensity model
-for different classes.
+for different clients classes.
 Artificial Neural Network (ANN) was prone to overtraining, while Support Vector Machine (SVM) 
 was too slow during the training and therefore difficult to optimize.
 These algorithms are not described in the report.
 
-Eventually, I used a popular random forest algorithm, as implemented in \textbf{\textsl{scikit-learn}},
-to train the clasifier for the class client class prediction. The classifier was trained 
+Eventually, I used a popular random forest algorithm implemented in \textbf{\textsl{scikit-learn}},
+to train the classifier for the class client class prediction. The classifier was trained 
 using one-vs-rest approach.
 
 \subsection{Feature selection and feature importance.}
-Clients that rejected the marketing offer have the characteristics very similar to
-the customers of different products. For example, the comparison of the feature distributions
-in two classes\footnote{All distributions for all pairs of classes can be provided for inspection on request.}
+Clients that rejected the marketing offer have characteristics very similar to
+the customers of different products. For example, the comparison of the feature
+distributions in two classes\footnote{All distributions for all pairs of
+classes can be provided for inspection on request.}
 is presented in Fig.~\ref{fig:input_features_class_comparison}. The 
 clients that responded to the \textit{credit card} (CC) marketing offer on average
 have lower balance on actual current account and have more live current accounts.
 \begin{figure}[htpb!]
     \centering
     \includegraphics[height=0.4\textheight]{../results/IntegralPlots/features_Rej_CL_1d_Products_ActBalance_p1}\\
-    \caption{Comprison of the training and hold-out distributions for two different
+    \caption{Comparison of the training and hold-out distributions for two different
     classes of clients.}
     \label{fig:input_features_class_comparison}
  \end{figure}
 
 In order to identify features that correlate with the propensity to buying certain
-class of products, the intrinsic impurity-based forest feature importance and permutation
-importance were used. The Fig.~\ref{fig:feature_importance} demonstrates the comparison
+class of products, the intrinsic impurity-based feature importance of the
+random forest algorithm and generic permutation importance measures were used. 
+Fig.~\ref{fig:feature_importance} demonstrates the comparison
 of two measures for different classes.
 \begin{figure}[htpb!]
     \centering
     \includegraphics[width=\textwidth]{../results/Multiclass_RF_OvR_1.7pre_wo_outliers_all_v7/rf_feature_importance}\\
-    \caption{ (Top) Impurity-based feature imortance for different classes markeing 
+    \caption{ (Top) Impurity-based feature importance for different classes marketing 
     offer outcome. (Bottom) Same for permutation importance. Only top 12 features are
     shown for each class.}
     \label{fig:feature_importance}
@@ -176,8 +182,8 @@ of two measures for different classes.
 The impurity-based feature importance of random forests suffers from being derived 
 from statistics of the training dataset, therefore permutation importance
 can be used as a useful cross check. As can be seen from the plots, in general, two
-imprortance ranking algorithms share the same features among their top ranking
-variables. These include Tenure, Age, current and savings accounts balance. 
+importance ranking algorithms share the same features among their top ranking
+variables. These include \textbf{Tenure, Age, current and savings accounts balance}. 
 Selecting only subset of the features reduces the dimensionality of the problem and
 therefore makes the model more robust to overtraining. It was found that using only 
 5 top ranked variables was sufficient to achieve optimal performance.
@@ -186,16 +192,17 @@ therefore makes the model more robust to overtraining. It was found that using o
 
 In order to optimize the parameters of the random forest, grid search with cross validation
 was performed. Area under the Receiver Operating Characteristic (ROC) curve for 
-for multiclass classification was used as the optimization metric. 
+multi-class classification was used as the optimization metric. 
+
 The validation plot is shown in Fig.~\ref{fig:validation_n_estimators}. Variations of the 
-parameters of the algorithm, such as number of trees, maximum depth, minimum
-number of samples in a leaf node and split criterion were invesigated. It was found
+parameters of the algorithm, such as \textbf{number of trees, maximum depth, minimum
+number of samples in a leaf node and split criterion} were investigated. It was found
 that the forests with higher complexity, e.g. with large number of trees or significant depth,
-exhibit larger generalization gap, while having improved generalization
+exhibit larger generalization gap, while having approximately the same generalization
 error. Therefore, low complexity models were preferred.
 The final configuration of the classifier is outlined in Tab.~\ref{tab:rf_params}.
 
-In order to mitigate potential problems due inbalanced population of different classes,
+In order to mitigate potential problems due to imbalanced population of different classes,
 intrinsic balancing mechanism of the random forest algorithm was enabled.
 
 \begin{figure}[htpb!]
@@ -208,16 +215,16 @@ intrinsic balancing mechanism of the random forest algorithm was enabled.
 \begin{figure}[htpb!]
     \centering
     \includegraphics[height=0.25\textheight]{../results/Multiclass_RF_OvR_1.7pre_wo_outliers_all_v7/Sale_multiclass_roc}\\
-    \caption{Reciever Operating Characteristic curves for the optimal
+    \caption{Receiver Operating Characteristic curves for the optimal
     classifier derived from the hold-out dataset. (Left) ROC curves for individual classes discriminated in one-vs-rest
-    fashion. (Right) Micro- and macro averaged ROC curves indicating overall
+    fashion. (Right) Micro- and macro- averaged ROC curves indicating overall
     classification performance for training and validation datasets.}
     \label{fig:roc_curves}
  \end{figure}
 
 The ROC curves of the optimal classifier for individual classes as well as micro-
-and macro-average ROC curves are presented in Fig.~\ref{fig:roc_curves}. The optimal
-classifier performs approximately 10\% better than random guessing. Signs of
+and macro-average ROC curves are presented in Fig.~\ref{fig:roc_curves}. \textbf{The optimal
+classifier performs approximately 10\% better than random guessing.} Signs of
 overtraining are visible from the gap between ROC curves calculated using the
 training and hold-out datasets. Larger training dataset may help to improve the model
 classification accuracy.
@@ -243,11 +250,11 @@ propensity to buying different products.
 
 Regression function for the expected return from the client accepting a marketing offer
 is also determined using machine learning technique. For each class, except for the
-trivial case, when the offer is rejected and the expected revenue is 0, an independent
-regression model for the revenue is constructed using \textbf{xgboost} algorithm. It
+trivial case, when the offer was rejected, an independent
+regression model for the revenue is constructed using \textbf{xgboost} algorithm, which
 is a fast numerical implementation of the boosted decision tree regressor.
 
-The Fig.~\ref{fig:targets_outliers} shows distributions of the revenue generated
+Fig.~\ref{fig:targets_outliers} shows distributions of the revenue generated
 by clients from different classes. The first bin at 0 corresponds to the clients, that
 rejected the offer. It can be seen that there are entries that fall outside of the bulk
 of the distributions. In order to not bias the regression model, the local outlier
@@ -265,11 +272,15 @@ three classes can be found in the Appendix~\ref{app:regression}.
 \end{figure}
 
 \section{Summary.}
-An analytical model for the optimization of the targering and revenue of the marketing
+An analytical model for the optimization of the targeting and revenue of the marketing
 campaign is proposed. The solution consists of the client propensity and the revenue
-regression models that can be used for the clients ranking. The file with the table
+regression models that can be used for the clients ranking. The propensity model
+prediction accuracy, as measured by the area under ROC curve, is approximately 10\% 
+better than random choice. The accuracy of the model may be improved using larger dataset.
+
+The executive summary of the study, the file with the table
 summarizing, which offer has to be targeted to which client as well as the expected 
-revenue for each client is provided.
+revenue for each client are provided separately.
 
 
 \clearpage
@@ -278,29 +289,29 @@ revenue for each client is provided.
 \begin{figure}[htpb!]
     \includegraphics[width=\textwidth]{../results/IntegralPlots/features_1d_Inflow_Outflow_p1}\\
     \includegraphics[width=\textwidth]{../results/IntegralPlots/features_1d_Inflow_Outflow_p2}
-    \caption{Normalized distributions of the client's feature variables for the subsests of the
+    \caption{Normalized distributions of the client's feature variables for the subsets of the
     data with known (Train) and unknown (Predict) target variables. Last bin contains
     overflow entries.}
-    \label{fig:inclus_inflow_outflow}
+    \label{fig:inclus_inflow_outflow1}
 \end{figure}
     \newpage
 \begin{figure}[htpb!]
         \includegraphics[width=\textwidth]{../results/IntegralPlots/features_1d_Products_ActBalance_p1}\\
         \includegraphics[width=\textwidth]{../results/IntegralPlots/features_1d_Products_ActBalance_p2}
-        \caption{Normalized distributions of the client's feature variables for the subsests of the
+        \caption{Normalized distributions of the client's feature variables for the subsets of the
         data with known (Train) and unknown (Predict) target variables. Last bin contains
         overflow entries.}
-        \label{fig:inclus_products_actbalance}
+        \label{fig:inclus_products_actbalance1}
 \end{figure}
 
 \begin{figure}[htpb!]
     \includegraphics[width=\textwidth]{../results/IntegralPlots/features_1d_Targets_p1}\\
-    \caption{Normalized distributions of the client's target variables for the subsests of the
+    \caption{Normalized distributions of the client's target variables for the subsets of the
     data with known (Train) and unknown (Predict) target variables. Target variables for
     the samples for which the outcome must be predicted were set to -1. The revenue
     for this subset is unknown and therefore is not shown on the plot. Last bin contains
     overflow entries.}
-    \label{fig:inclus_targets}
+    \label{fig:inclus_targets1}
 \end{figure}
 
 \clearpage
@@ -309,19 +320,19 @@ revenue for each client is provided.
     \includegraphics[width=\textwidth]{../results/Multiclass_RF_1.6pre_wo_outliers_all_v3/Revenue_MF_learning_curve}\\
     \caption{Loss curves showing mean squared error and mean absolute error for the
              MF class.}
-    \label{fig:inclus_targets}
+    \label{fig:lc_MF}
 \end{figure}
 \begin{figure}[htpb!]
     \includegraphics[width=\textwidth]{../results/Multiclass_RF_1.6pre_wo_outliers_all_v3/Revenue_CC_learning_curve}\\
     \caption{Loss curves showing mean squared error and mean absolute error for the
              CC class.}
-    \label{fig:inclus_targets}
+    \label{fig:lc_cc}
 \end{figure}
 \begin{figure}[htpb!]
     \includegraphics[width=\textwidth]{../results/Multiclass_RF_1.6pre_wo_outliers_all_v3/Revenue_CL_learning_curve}\\
     \caption{Loss curves showing mean squared error and mean absolute error for the
              CL class.}
-    \label{fig:inclus_targets}
+    \label{fig:lc_cl}
 \end{figure}
 
 \end{document}
