@@ -414,3 +414,23 @@ df['Name']=df['Name'].apply(lambda en: en.split(',')[0])
 df['Embarked'] = df['Embarked'].replace({np.nan:0,'S':1,'C':2,'Q':3})
 df.to_csv('data/2019-12-05/test.csv')
 ```
+
+## scons dependency graph
+**Requires graphviz**
+
+Air-Inna:kbc innamakarenko$ ./scons-3.1.2-install/bin/scons --tree=all -Q -n -f ./experiments/SConstruct_experiment_mlp kbc| ./bin/scons_dependency_tree.py | dot -Tpng > dot_rendering.png
+
+```python
+#replace the following line in the scons_dependency_tree.py
+root_start_symbol_sequence = "+-kbc"
+#->
+root_start_symbol_sequence = "+-."
+```
+Air-Inna:kbc innamakarenko$ ./scons-3.1.2-install/bin/scons --tree=all -Q -n -f ./experiments/SConstruct_experiment_mlp | ./bin/scons_dependency_tree.py | dot -Tpng > dot_rendering.png
+Air-Inna:kbc innamakarenko$ open dot_rendering.png 
+Air-Inna:kbc innamakarenko$ ./scons-3.1.2-install/bin/scons --tree=all -Q -n -f ./experiments/SConstruct_experiment_mlp | ./bin/scons_dependency_tree.py | fdp -Tpng > fdp_rendering.png
+Air-Inna:kbc innamakarenko$ open fdp_rendering.png 
+Air-Inna:kbc innamakarenko$ ./scons-3.1.2-install/bin/scons --tree=all -Q -n -f ./experiments/SConstruct_experiment_mlp | ./bin/scons_dependency_tree.py | neato -Tpng > neato_rendering.png
+Air-Inna:kbc innamakarenko$ open fdp_rendering.png 
+Air-Inna:kbc innamakarenko$ ./scons-3.1.2-install/bin/scons --tree=all -Q -n -f ./experiments/SConstruct_experiment_mlp | ./bin/scons_dependency_tree.py | circo -Tpng > circo_rendering.png
+
