@@ -1,7 +1,7 @@
 from numpy import linspace
 config={
   'annotation': 'Modelling data distributions.',
-  'compatibility_version':'1.7pre',
+  'compatibility_version':'1.8',
   'command': 'bin/kbc_direct_marketing_mock.py -c configs/conf_baseline_noOutliers_Multiclass_cff.py',
   'latex_main': 'latex/report.tex',
   'model':{
@@ -10,11 +10,14 @@ config={
    'data_provider':'model_data_provider',
    'do_training':True,
    # 'input_features':['Sex', 'Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'TransactionsCred', 'TransactionsCred_CA', 'VolumeDeb', 'VolumeDeb_CA', 'VolumeDebCash_Card', 'VolumeDebCashless_Card', 'VolumeDeb_PaymentOrder', 'TransactionsDeb', 'TransactionsDeb_CA', 'TransactionsDebCash_Card', 'TransactionsDebCashless_Card', 'TransactionsDeb_PaymentOrder', 'Count_CA', 'Count_SA', 'Count_MF', 'Count_OVD', 'Count_CC', 'Count_CL', 'ActBal_CA', 'ActBal_SA', 'ActBal_MF', 'ActBal_OVD', 'ActBal_CC', 'ActBal_CL'],
-   'input_features':['Age', 'Tenure', 'VolumeCred', 'VolumeDeb_CA', 'VolumeCred_CA', 'TransactionsDeb', 'TransactionsCred_CA', 'TransactionsDeb_CA', 'TransactionsDebCashless_Card', 'VolumeDeb', 'ActBal_CA', 'ActBal_SA'],
+   # 'input_features':['Age', 'Tenure', 'VolumeCred', 'VolumeDeb_CA', 'VolumeCred_CA', 'TransactionsDeb', 'TransactionsCred_CA', 'TransactionsDeb_CA', 'TransactionsDebCashless_Card', 'VolumeDeb', 'ActBal_CA', 'ActBal_SA'],
+   'input_features':['Age', 'Tenure', 'TransactionsDiff', 'Transactions_CADiff', 'TransactionsDebCashless_Card', 'VolumeDiff', 'ActBal_CA', 'ActBal_SA'],
 #    'target':['Sale_Multiclass'],
-   'target':[0,1,2,3],
+   # 'target':[0,1,2,3],
    # 'target':[0,1,2,3,4],
    # 'target':[0,1,2,3,4,5,6],
+   # 'target':[0,1,2,3,4,5,6,7],
+   'target':['Sale_MF','Sale_CC','Sale_CL'],
    'n_estimators':[10,30,40,50,100],
    'max_depth':[2],
    'criterion':'gini',
@@ -23,7 +26,8 @@ config={
    'min_samples_leaf':[20]
   },
   'mode': 'report',
-  'views':['prob_correlations','confusion_matrix','importance','ROC','validation_curve'],
+#   'views':['prob_correlations','confusion_matrix','importance','ROC','validation_curve'],
+  'views':['confusion_matrix','ROC','validation_curve'],
   'validation_curve':{
      'annotation': 'Validation curve',
      'type':'validation_curve',
@@ -47,9 +51,11 @@ config={
      'output_filename':'Sale_multiclass_roc',
      'layout':{'nrows':1, 'ncols':2},
      'size': [12.5,5.0],
-     'class_names':['0','1','2','3'],
+   #   'class_names':['0','1','2','3'],
    #   'class_names':['0','1','2','3','4'],
    #   'class_names':['0','1','2','3','4','5','6'],
+   #   'class_names':['0','1','2','3','4','5','6','7'],
+     'class_names':['Sale_MF','Sale_CC','Sale_CL'],
      'metrics':['individual','average'],
   },
   'learning_curve':{
@@ -87,9 +93,11 @@ config={
      'output_filename':'multiclass_confusion_matrix',
      'layout':{'nrows':1, 'ncols':2},
      'size': [8.5,5.0],
-     'class_names':['0','1','2','3'],
+   #   'class_names':['0','1','2','3'],
    #   'class_names':['0','1','2','3','4']
    #   'class_names':['0','1','2','3','4','5','6'],
+   #   'class_names':['0','1','2','3','4','5','6','7'],
+     'class_names':['Sale_MF','Sale_CC','Sale_CL'],
   },
   'prob_correlations':{
      'annotation': 'Classifier train/test samples',

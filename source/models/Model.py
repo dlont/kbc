@@ -120,6 +120,7 @@ class AdvancedModelClassificationOvRRF(Model):
                 from sklearn.model_selection import GridSearchCV
                 grid_search = GridSearchCV(OneVsRestClassifier(self.my_model), param_grid=param_grid,return_train_score=True,scoring='roc_auc_ovo')
                 start = time.time()
+                print(data_provider.train[target_variable_names])
                 grid_search.fit(data_provider.train[input_features_names], data_provider.train[target_variable_names])
                 print("GridSearchCV took %.2f seconds for %d candidate parameter settings." % (time.time() - start, len(grid_search.cv_results_['params'])))
 
@@ -304,6 +305,8 @@ class AdvancedModelClassificationMLP(Model):
                 # print "Mean squared error: ", mean_squared_error(y_test,y_pred)
 
                 # self.fit_results = self.my_model.evals_result()
+                self.fit_results = grid_search.cv_results_
+
                 pickle.dump(self.my_model, open(self._configuration['model']['output_filename'], 'wb'))
 
                 pass

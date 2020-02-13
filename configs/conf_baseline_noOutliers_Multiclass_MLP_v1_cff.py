@@ -12,12 +12,14 @@ config={
 #    'input_features':['Sex', 'Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'TransactionsCred', 'TransactionsCred_CA', 'VolumeDeb', 'VolumeDeb_CA', 'VolumeDebCash_Card', 'VolumeDebCashless_Card', 'VolumeDeb_PaymentOrder', 'TransactionsDeb', 'TransactionsDeb_CA', 'TransactionsDebCash_Card', 'TransactionsDebCashless_Card', 'TransactionsDeb_PaymentOrder', 'Count_CA', 'Count_SA', 'Count_MF', 'Count_OVD', 'Count_CC', 'Count_CL', 'ActBal_CA', 'ActBal_SA', 'ActBal_MF', 'ActBal_OVD', 'ActBal_CC', 'ActBal_CL'],
    'input_features':['Age', 'Tenure', 'VolumeCred', 'VolumeCred_CA', 'VolumeDeb', 'ActBal_CA', 'ActBal_SA'],
 #    'target':['Sale_Multiclass'],
-   'target':[0,1,2,3,4],
-   'alpha':[0.001,0.1,1.,10,50],
-   # 'hidden_layer_sizes':[(5, )],
-   'hidden_layer_sizes':[(5, 5),(10,10)],
+   # 'target':[0,1,2,3,4],
+   'target':['Sale_MF','Sale_CC','Sale_CL'],
+   # 'alpha':[0.0001,0.001,0.1,1.,10,50],
+   'alpha':[1.0],
+   'hidden_layer_sizes':[(10, )],
+   # 'hidden_layer_sizes':[(5, 5),(10,10)],
    'activation':'relu',
-   'max_iter':[10000]
+   'max_iter':[10,50,100,200,500,1000,5000,10000,50000]
    # 'max_iter':[1000,5000,10000,50000]
    # 'activation':'logistic',
    # 'max_iter':[5,10,20,30,50,500,1000,5000]
@@ -25,7 +27,26 @@ config={
   'mode': 'report',
 #   'views':['learning_curve','output_classifier','prob_correlations','confusion_matrix'],
 #   'views':['output_classifier','prob_correlations','confusion_matrix'],
-  'views':['confusion_matrix','ROC'],
+#   'views':['confusion_matrix','ROC','validation_curve_alpha','validation_curve_max_iter'],
+  'views':['confusion_matrix','ROC','validation_curve_max_iter'],
+  'validation_curve_alpha':{
+     'annotation': 'Validation curve',
+     'type':'validation_curve',
+     'output_filename':'validation_curves',
+     'layout':{'nrows':1, 'ncols':2},
+     'parameters':['estimator__alpha'],
+     'style':{'logx':True},
+     'size': [15.5,8.0],
+  },
+  'validation_curve_max_iter':{
+     'annotation': 'Validation curve',
+     'type':'validation_curve',
+     'output_filename':'validation_curves_max_iter',
+     'layout':{'nrows':1, 'ncols':2},
+     'parameters':['estimator__max_iter'],
+     'style':{'logx':True},
+     'size': [15.5,8.0],
+  },
   'learning_curve':{
      'annotation': 'Learning curve MLP',
      'type':'multiclassification_learning_curve_mlp',
@@ -61,7 +82,8 @@ config={
      'output_filename':'Sale_multiclass_roc',
      'layout':{'nrows':1, 'ncols':2},
      'size': [12.5,5.0],
-     'class_names':['0','1','2','3','4'],
+   #   'class_names':['0','1','2','3','4'],
+     'class_names':['Sale_MF','Sale_CC','Sale_CL'],
      'metrics':['individual','average'],
   },
   'confusion_matrix':{
@@ -70,7 +92,8 @@ config={
      'output_filename':'multiclassification_ovr_confusion_matrix',
      'layout':{'nrows':1, 'ncols':2},
      'size': [8.5,5.0],
-     'class_names':['0','1','2','3','4']
+   #   'class_names':['0','1','2','3','4']
+     'class_names':['Sale_MF','Sale_CC','Sale_CL'],
   },
   'prob_correlations':{
      'annotation': 'Classifier train/test samples',

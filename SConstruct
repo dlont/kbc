@@ -24,12 +24,14 @@ env = Environment(ENV = os.environ)
 # output_dir = 'results/Multiclass_RF_OvR_1.7pre_wo_outliers_all_v5'
 # output_dir = 'results/Multiclass_RF_OvR_1.7pre_wo_outliers_all_v6'
 # output_dir = 'results/Multiclass_RF_OvR_1.7pre_wo_outliers_all_v7'
+# output_dir = 'results/Multiclass_RF_OvR_1.8_wo_outliers_all_v8'
 # output_dir = 'results/Multiclass_RF_Binarized_1.6pre_wo_outliers_all'
 # output_dir = 'results/Multiclass_SVC_1.6pre_wo_outliers_all'
 # output_dir = 'results/Multiclass_MLP_1.6pre_wo_outliers_all'
 # output_dir = 'results/Multiclass_MLP_1.6pre_wo_outliers_all_v1'
 # output_dir = 'results/Multiclass_MLP_1.6pre_wo_outliers_all_v2'
-output_dir = 'results/IntegralPlots'
+output_dir = 'results/Multiclass_MLP_1.8_wo_outliers_all_v8'
+# output_dir = 'results/IntegralPlots'
 
 
 ref_config = 'configs/conf_baseline_noOutliers_Multiclass_RF_cff.py'
@@ -53,10 +55,10 @@ ref_config = 'configs/conf_baseline_noOutliers_Multiclass_RF_cff.py'
 # dev_config = 'configs/conf_baseline_noOutliers_Multiclass_RF_Binarized_cff.py'
 # dev_config = 'configs/conf_baseline_noOutliers_Multiclass_SVC_cff.py'
 # dev_config = 'configs/conf_baseline_noOutliers_Multiclass_MLP_cff.py'
-# dev_config = 'configs/conf_baseline_noOutliers_Multiclass_MLP_v1_cff.py'
+dev_config = 'configs/conf_baseline_noOutliers_Multiclass_MLP_v1_cff.py'
 # dev_config = 'configs/conf_baseline_plots_Rej_CL_cff.py'
 # dev_config = 'configs/conf_baseline_zoom_plots_Rej_MF_cff.py'
-dev_config = 'configs/conf_baseline_plots_IntegralOverClasses_cff.py'
+# dev_config = 'configs/conf_baseline_plots_IntegralOverClasses_cff.py'
 
 configs_compare = ['configs/conf_cff.py','configs/conf_baseline_vanilla_cff.py']
 configs_revenue_targets = [
@@ -79,7 +81,7 @@ configs_zoom_plots = ['configs/conf_baseline_zoom_plots_Rej_MF_cff.py',
                       'configs/conf_baseline_zoom_plots_MF_CL_cff.py',
                       ]
 configs = [dev_config]
-configs = configs_plots
+# configs = configs_plots
 # configs = configs_zoom_plots
 # configs = configs_plots + configs_zoom_plots + [dev_config]
 # configs = configs_revenue_targets

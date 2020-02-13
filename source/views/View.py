@@ -947,7 +947,21 @@ class ViewValidationCurve(View):
         def __init__(self,view_name=None):
                 self.view_name = view_name
                 pass
-        
+
+        def style_validation_pad(self, ax):
+                '''
+                Apply style such as logarithmic scales, legend, title, etc.
+                '''
+                # Plot style
+                ax.legend(loc="best")
+                if 'legend' in self.model._configuration[self.view_name]: 
+                        ax.legend(prop=self.model._configuration[self.view_name]['style']['legend']['prop'])
+                if 'logx' in self.model._configuration[self.view_name]['style']: 
+                        if self.model._configuration[self.view_name]['style']['logx']: ax.set_xscale("log")
+                if 'logy' in self.model._configuration[self.view_name]['style']: 
+                        if self.model._configuration[self.view_name]['style']['logy']: ax.set_yscale("log")
+                # ax.set_title('{0}:\n{1}'.format(*feature_tup))
+
         @log_with()
         def draw(self):
                 if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
@@ -993,7 +1007,7 @@ class ViewValidationCurve(View):
                                         color="navy", lw=2)
                         pads[pad].set_xlabel(param)
                         pads[pad].set_ylabel('ROC AUC')
-                        pads[pad].legend(loc="best")
+                        self.style_validation_pad(pads[pad])
 
                 fig.tight_layout()
                 # plt.show()

@@ -144,8 +144,11 @@ class PandasDataProviderRespondingClientsNoOutliers(PandasDataProviderFromCSV):
             self.training_fraction = 0.7
             all_data = pd.read_csv(self.filename_csv, index_col='Client')
 
+            #Add new features
+            all_data['VolumeDiff'] = all_data['VolumeDeb'] - all_data['VolumeCred']
+            all_data['TransactionsDiff'] = all_data['TransactionsDeb'] - all_data['TransactionsCred']
+            all_data['Transactions_CADiff'] = all_data['TransactionsDeb_CA'] - all_data['TransactionsCred_CA']
             #Add multiclass enconded axis. This enconding is bad since it results in overlaping classes. DO NOT USE!
-
             #Add multiclass binary encoding
             all_data['Sale_Multiclass'] = all_data[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:self.ordinal_enconding(el),axis=1)
             multiclass_bin = pd.DataFrame(label_binarize(all_data['Sale_Multiclass'],classes=[0,1,2,3]),index=all_data.index)
@@ -153,6 +156,8 @@ class PandasDataProviderRespondingClientsNoOutliers(PandasDataProviderFromCSV):
             # multiclass_bin = pd.DataFrame(label_binarize(all_data['Sale_Multiclass'],classes=[0,1,2,3,4]),index=all_data.index)
             # all_data['Sale_Multiclass'] = all_data[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:self.complete_binary_coding(el),axis=1)
             # multiclass_bin = pd.DataFrame(label_binarize(all_data['Sale_Multiclass'],classes=[0,1,2,3,4,5,6]),index=all_data.index)
+            # all_data['Sale_Multiclass'] = all_data[['Sale_MF','Sale_CC','Sale_CL']].apply(lambda el:self.binary_coding(el),axis=1)
+            # multiclass_bin = pd.DataFrame(label_binarize(all_data['Sale_Multiclass'],classes=[0,1,2,3,4,5,6,7]),index=all_data.index)
             all_data=pd.merge(all_data,multiclass_bin,left_index=True,right_index=True)
 
             # all_data['weights'] = all_data['Sale_Multiclass'].apply(self.reduced_binary_encoding_weight)
