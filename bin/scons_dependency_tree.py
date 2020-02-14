@@ -10,7 +10,7 @@ used_substitute_set = { }
 
 match_skip = [ ]
 
-substitute = { '/Library/Frameworks/Python.framework/Versions/3.8/bin/python3' : 'python3\ngit:69cf48d\nmd5:1d0e3484c079278c9c061dcf4973e584' }
+substitute = { '/Library/Frameworks/Python.framework/Versions/3.8/bin/python3' : 'python3' }
 
 # root_start_symbol_sequence = "+-."
 root_start_symbol_sequence = "+-kbc"
