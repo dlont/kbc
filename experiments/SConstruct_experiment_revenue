@@ -1,60 +1,13 @@
 import os, sys, subprocess
 import hashlib
+
+env = Environment(ENV = os.environ)
+
 def PhonyTargets(env = None, **kw):
     if not env: env = DefaultEnvironment()
     for target,action in kw.items():
         env.AlwaysBuild(env.Alias(target, [], action))
-        
-env = Environment(ENV = os.environ)
 
-output_dir = 'results/RevenueCrossCheck'
-
-configs_revenue_targets = [
-                           'configs/conf_baseline_noOutliersAll_Revenue_CC_cff.py',
-                           'configs/conf_baseline_noOutliersAll_Revenue_CL_cff.py',
-                           'configs/conf_baseline_noOutliersAll_Revenue_MF_cff.py'
-                           ]
-
-configs = configs_revenue_targets
-
-# kbc_compare = env.Command([output_dir+'features_1d_Inflow_Outflow_p1.png',
-#                   output_dir+'features_1d_Inflow_Outflow_p2.png',
-#                   output_dir+'features_1d_Products_ActBalance_p1.png',
-#                   output_dir+'features_1d_Products_ActBalance_p2.png',
-#                   output_dir+'features_1d_Soc_Dem_p1.png',
-#                   output_dir+'features_1d_Targets_p1.png',
-#                   output_dir+'features_2d_Targets_correlations_p1.png'],
-#              configs_compare,
-#              "python3 bin/kbc_direct_marketing_mock.py -b -c $SOURCES --dir={0}".format(output_dir))
-
-kbc = env.Command([output_dir+'Xfeatures_1d_Inflow_Outflow_p1.png',
-                  output_dir+'Xfeatures_1d_Inflow_Outflow_p2.png',
-                  output_dir+'Xfeatures_1d_Products_ActBalance_p1.png',
-                  output_dir+'Xfeatures_1d_Products_ActBalance_p2.png',
-                  output_dir+'Xfeatures_1d_Soc_Dem_p1.png',
-                  output_dir+'Xfeatures_1d_Targets_p1.png',
-                  output_dir+'Xfeatures_2d_Targets_correlations_p1.png'],
-             [configs,"data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv"],
-             "python3 bin/kbc_direct_marketing_mock.py -c $SOURCES --dir={0}".format(output_dir))
-
-config_predictions = 'configs/conf_baseline_predictions_cff.py'
-prediction = env.Command([output_dir+'clients_rank.csv'],
-             config_predictions,
-             "python3 bin/kbc_direct_marketing_mock.py -c $SOURCES --dir={0}".format(output_dir))
-
-PhonyTargets(env, make_output_folder = '-[ ! -d {0} ] && mkdir {0}'.format(output_dir))
-PhonyTargets(env, trash_plots = '-rm {0}/features_* {0}/*learning_curve* {0}/*lasso_lars_ic_criterion* {0}/multiclass_classifier_distribution*'.format(output_dir))
-PhonyTargets(env, train_test_tables = 'python3 source/train_test_preparation/train_test_datasets.py -c configs/train_test_csv_cff.py')
-PhonyTargets(env, train_test_tables_Products_ActBalance_default = 'python source/train_test_preparation/train_test_datasets.py -c configs/train_test_csv_Products_ActBalance_default0_cff.py')
-
-env.Alias('kbc',['make_output_folder',kbc])
-env.Alias('runall', ['trash_plots',kbc])
-env.Alias('pred',[prediction])
-# env.Alias('runcompareall', ['trash_plots',kbc_compare])
-
-PhonyTargets(env, latex_report_clean = '-rm {0}/main.aux {0}/main.fdb_latexmk {0}/main.fls {0}/main.log {0}/main.pdf {0}/main.synctex.gz'.format('report'))
-
-#custom print tree
 git_tag = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).strip('\n')
 
 def md5(fname):
@@ -164,9 +117,36 @@ AddOption('--mytree',
           action='store',
           metavar='DIR',
           help='print decorated build tree for graphviz')
-my_tree = GetOption('mytree')
 
-if my_tree != '':
+output_dir = 'results/RevenueCrossCheck'
+
+configs_revenue_targets = [
+                           'configs/conf_baseline_noOutliersAll_Revenue_CC_cff.py',
+                           'configs/conf_baseline_noOutliersAll_Revenue_CL_cff.py',
+                           'configs/conf_baseline_noOutliersAll_Revenue_MF_cff.py'
+                           ]
+
+configs = configs_revenue_targets
+
+kbc_CC = env.Command([output_dir+'Revenue_CC_cross_check.png'],
+             [['configs/conf_baseline_noOutliersAll_Revenue_CC_crosscheck_cff.py'],"data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv"],
+             "python3 bin/kbc_direct_marketing_mock.py -c $SOURCES --dir={0}".format(output_dir))
+kbc_CL = env.Command([output_dir+'Revenue_CL_cross_check.png'],
+             [['configs/conf_baseline_noOutliersAll_Revenue_CL_crosscheck_cff.py'],"data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv"],
+             "python3 bin/kbc_direct_marketing_mock.py -c $SOURCES --dir={0}".format(output_dir))
+kbc_MF = env.Command([output_dir+'Revenue_MF_cross_check.png'],
+             [['configs/conf_baseline_noOutliersAll_Revenue_MF_crosscheck_cff.py'],"data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv"],
+             "python3 bin/kbc_direct_marketing_mock.py -c $SOURCES --dir={0}".format(output_dir))
+
+PhonyTargets(env, make_output_folder = '-[ ! -d {0} ] && mkdir {0}'.format(output_dir))
+PhonyTargets(env, trash_plots = '-rm {0}/features_* {0}/*learning_curve* {0}/*lasso_lars_ic_criterion* {0}/multiclass_classifier_distribution*'.format(output_dir))
+
+env.Alias('kbc',['make_output_folder',kbc_CC,kbc_CL,kbc_MF])
+env.Alias('runall', ['trash_plots','kbc'])
+
+PhonyTargets(env, latex_report_clean = '-rm {0}/main.aux {0}/main.fdb_latexmk {0}/main.fls {0}/main.log {0}/main.pdf {0}/main.synctex.gz'.format('report'))
+
+if GetOption('mytree') != '':
     for item in BUILD_TARGETS:
         print_child_nodes(env.arg2nodes(item)[0],get_all_children)
     pass
