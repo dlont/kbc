@@ -10,10 +10,7 @@ used_substitute_set = { }
 
 match_skip = [ ]
 
-substitute = { '/usr/include/glib' : 'glib', '/usr/lib/glib' : 'glib',
-               '/usr/include/gtk' : 'gtk', '/usr/lib/gtk' : 'gtk',
-               '/usr/include/pango' : 'pango', '/usr/include/atk' : 'atk',
-               '/usr/include/cairo' : 'cairo', '/usr/include/python' : 'libpython' }
+substitute = { '/Library/Frameworks/Python.framework/Versions/3.8/bin/python3' : 'python3\ngit:69cf48d\nmd5:1d0e3484c079278c9c061dcf4973e584' }
 
 # root_start_symbol_sequence = "+-."
 root_start_symbol_sequence = "+-kbc"

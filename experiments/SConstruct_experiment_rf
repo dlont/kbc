@@ -1,4 +1,10 @@
 import os
+from SCons import Util
+
+def my_render_tree(root, child_func, prune=0, showtags=0, margin=[0], visited=None):
+    print( "Hello, Man!\n" )
+
+Util.print_tree = my_render_tree
 
 def PhonyTargets(env = None, **kw):
     if not env: env = DefaultEnvironment()
@@ -96,10 +102,13 @@ configs = [dev_config]
 #              configs_compare,
 #              "python3 bin/kbc_direct_marketing_mock.py -b -c $SOURCES --dir={0}".format(output_dir))
 
-kbc = env.Command([output_dir+'Sale_multiclass_roc.png',
-                  output_dir+'multiclassification_ovr_confusion_matrix.png',
-                  output_dir+'validation_curves_max_iter.png',
-                  output_dir+'Multiclassification_MLP.pkl'],
+kbc = env.Command([output_dir+'Xfeatures_1d_Inflow_Outflow_p1.png',
+                  output_dir+'Xfeatures_1d_Inflow_Outflow_p2.png',
+                  output_dir+'Xfeatures_1d_Products_ActBalance_p1.png',
+                  output_dir+'Xfeatures_1d_Products_ActBalance_p2.png',
+                  output_dir+'Xfeatures_1d_Soc_Dem_p1.png',
+                  output_dir+'Xfeatures_1d_Targets_p1.png',
+                  output_dir+'Xfeatures_2d_Targets_correlations_p1.png'],
              [configs,"data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv"],
              "python3 bin/kbc_direct_marketing_mock.py -c $SOURCES --dir={0}".format(output_dir))
 
