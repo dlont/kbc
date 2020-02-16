@@ -22,6 +22,15 @@ config={
      'annotation': 'Distribution of revenues for predicted clients',
      'type':'clients_revenue',
      'output_filename':'targets_predictions',
+     'title':'target variable for \n revenue from mutual fund',
+     'layout':{'nrows':1, 'ncols':3},
+     'size': [8.5,2.5],
+     'style':{
+            'type' : 'numerical',
+            'under_over_flow' : [False,True],
+            'bins':linspace(0.,50.,26),
+            'logy':True,
+        },
   },
   'model_data_provider':{
         'type':'PandasDataProviderRespondingClientsNoOutliers',

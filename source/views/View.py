@@ -1219,6 +1219,11 @@ class ViewClientsRevenue(View):
         @log_with()
         def draw(self):
                 if not self.view_name: raise RuntimeError('Cannot build view. View name is not specified!')
+                nrows=self.model._configuration[self.view_name]['layout']['nrows']
+                ncols=self.model._configuration[self.view_name]['layout']['ncols']
+                fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+                fig.set_size_inches(*self.model._configuration[self.view_name]['size'])
+                pads = axes.flatten()
 
                 data_provider = self.model.get_data_provider(self.model._configuration['model']['data_provider'])
                 X = data_provider.data
@@ -1237,6 +1242,42 @@ class ViewClientsRevenue(View):
                 revenue_CL = self.model.my_revenue_cl.predict(X_reg_CL)
 
                 print (y_prob)
+                print (list(map(np.argmax, y_prob)))
+
+                best_class_MF_revenue = [revenue_MF[el] for el,best_class in enumerate(list(map(np.argmax, y_prob))) if best_class == 1]
+                print (best_class_MF_revenue)
+
+                # Class 1 training and testing distributions
+                # Binning configuration
+                underflow, overflow = self.model._configuration[self.view_name]['style']['under_over_flow']
+                bins = self.model._configuration[self.view_name]['style']['bins']
+                bin_centers = bins[0:-1]+np.diff(bins)/2.
+                logging.debug('bin_centers ({0})={{1}}'.format(self.view_name,bin_centers))
+
+                if any([underflow, overflow]):
+                        pads[0].hist(np.clip(best_class_MF_revenue, bins[0] if underflow else None, bins[-1] if overflow else None), bins,
+                        density=True, histtype='stepfilled',
+                        color='g', 
+                        label='predicted', alpha = 0.5)
+                else:
+                        pads[0].hist(best_class_MF_revenue, bins, 
+                        density=True, histtype='stepfilled', 
+                        color='r', 
+                        label='predicted', alpha = 0.5)
+                # hist_testing = np.histogram(y_pred_test, bins)
+                # if any([underflow, overflow]):
+                #         hist_testing = np.histogram(np.clip(y_pred_test, bins[0] if underflow else None, bins[-1] if overflow else None), bins)
+                # points_testing_y = hist_testing[0]/np.diff(bins)/float(np.sum(hist_testing[0]))
+                # points_testing_yerr = np.sqrt(hist_testing[0])/np.diff(bins)/float(np.sum(hist_testing[0]))
+                # pads[pad].errorbar(bin_centers, points_testing_y, yerr=points_testing_yerr, marker=self.model._configuration[self.view_name]['class1_marker_test'], 
+                # ls=self.model._configuration[self.view_name]['class1_line_test'], color=self.model._configuration[self.view_name]['class1_color_test'], 
+                # label=self.model._configuration[self.view_name]['class1_label_test'])
+
+                pads[0].legend()
+                pads[0].set_xlabel('Revenue for prediction entries')
+                # pads[0].set_title('REJECT=0,MF=1,CC=2,CL=3'.format(distribution))
+
+                plt.show()
 
                 pass
 
