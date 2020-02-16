@@ -18,7 +18,7 @@ config={
   },
   'mode': 'report',
   'views':['revenue'],
-  'offers':{
+  'revenue':{
      'annotation': 'Distribution of revenues for predicted clients',
      'type':'clients_revenue',
      'output_filename':'targets_predictions',
