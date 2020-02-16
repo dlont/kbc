@@ -1203,13 +1203,13 @@ class ViewModelConfusionMatrix_old(View):
                 for name in self.get_outfile_name(): plt.savefig(name)
                 plt.close(fig)
 
-class ViewClientsRevenue(ViewClientsRank):
+class ViewClientsRevenue(View):
         @log_with()
         def __init__(self,view_name=None):
                 self.view_name = view_name
                 pass
 
-                
+
         def max_argmax_class(self,a):
                 #0->MF,1->CC,2->CL
                 index_class_dic = {0:1,1:2,2:3}
