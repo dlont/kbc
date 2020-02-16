@@ -1235,22 +1235,8 @@ class ViewClientsRevenue(View):
                 revenue_MF = self.model.my_revenue_mf.predict(X_reg_MF)
                 revenue_CC = self.model.my_revenue_cc.predict(X_reg_CC)
                 revenue_CL = self.model.my_revenue_cl.predict(X_reg_CL)
-                # max revenue among different classes
-                Mix= np.array( [self.max_argmax_class([revenue_MF[entry],revenue_CC[entry],revenue_CL[entry]]) for entry in range(0,len(X))] )
-                revenue_mix = np.array(Mix[:,0])
-                Mix_class = np.array(Mix[:,1])
 
-                exp_revenue_MF = y_prob[:,1]*revenue_MF
-                exp_revenue_CC = y_prob[:,2]*revenue_CC
-                exp_revenue_CL = y_prob[:,3]*revenue_CL
-                exp_revenue_mix = y_prob[:,4]*revenue_mix
-
-                exp_revenue = np.array([exp_revenue_MF,exp_revenue_CC,exp_revenue_CL,exp_revenue_mix]).transpose()
-                offer_class = np.array([[1]*len(X),[2]*len(X),[3]*len(X),Mix_class]).transpose()
-                best_offer_class = np.array( [offer_class[entry,np.argmax(exp_revenue[entry])] for entry in range (0,len(X))] )
-                best_offer_revenue = np.array( [exp_revenue[entry,np.argmax(exp_revenue[entry])] for entry in range (0,len(X))] )
-
-                print (offer_class)
+                print (y_prob)
 
                 pass
 
