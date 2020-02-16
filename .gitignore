@@ -3,6 +3,7 @@ SConstruct
 build/
 scons-3.1.2-install/
 source/uml/
+results/*
 *.pyc
 
 report/main.aux
