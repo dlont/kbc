@@ -170,6 +170,8 @@ def main(arguments):
                             view = ViewValidationCurve(view_name)
                     elif configuration[view_name]['type'] == 'clients_rank':
                             view = ViewClientsRank(view_name)
+                    elif configuration[view_name]['type'] == 'clients_revenue':
+                            view = ViewClientsRevenue(view_name)
                     else: view = View(view_name)
                     view.set_model(model)
                     view.set_style(style)
