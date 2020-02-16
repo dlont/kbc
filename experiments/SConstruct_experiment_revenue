@@ -129,7 +129,7 @@ kbc = env.Command([output_dir+'clients_revenue.png'],
              'results/Multiclass_RF_1.6pre_wo_outliers_all_v3/Revenue_CL_regression.pkl',
              'results/Multiclass_RF_1.6pre_wo_outliers_all_v3/Revenue_MF_regression.pkl',
              "data/28_01_2020_1584entries/data_Products_ActBalance_default0.csv"],
-             "python3 bin/kbc_direct_marketing_mock.py -c $SOURCES --dir={0}".format(output_dir))
+             "python3 bin/kbc_direct_marketing_mock.py -c {0} --dir={1}".format(' '.join(configs), output_dir))
 
 PhonyTargets(env, make_output_folder = '-[ ! -d {0} ] && mkdir {0}'.format(output_dir))
 PhonyTargets(env, trash_plots = '-rm {0}/features_* {0}/*learning_curve* {0}/*lasso_lars_ic_criterion* {0}/multiclass_classifier_distribution*'.format(output_dir))
